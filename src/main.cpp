@@ -42,6 +42,18 @@ class robot {
     int processAxis(int input, int cutoff);
 };
 
+// custom button class
+class customButton {
+    public:
+        // variables
+        bool isToggle;
+
+        // function
+        customButton(bool toggle, );
+
+
+};
+
 // A global instance of competition
 competition Competition;
 controller Controller;
@@ -120,3 +132,8 @@ int robot::processAxis(int input, int cutoff) {
     if (result <= cutoff && result >= -cutoff) result = 0;
     return result;
 }
+
+/*
+*   Button class definitions
+*/
+
