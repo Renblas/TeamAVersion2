@@ -1,7 +1,7 @@
 /*----------------------------------------------------------------------------*/
 /*                                                                            */
 /*    Module:       main.cpp                                                  */
-/*    Author:       VEX                                                       */
+/*    Author:       ur mom                                                    */
 /*    Created:      Thu Sep 26 2019                                           */
 /*    Description:  Competition Template                                      */
 /*                                                                            */
@@ -49,7 +49,7 @@ class customButton {
         bool isToggle;
 
         // function
-        customButton(bool toggle, );
+        customButton(bool toggle);
 
 
 };
@@ -76,6 +76,7 @@ void usercontrol(void) {
     
     Robot.getUserInput();
     Robot.updateMotors();
+
 
 
     wait(20, msec); // Sleep the task for a short amount of time to
@@ -137,3 +138,6 @@ int robot::processAxis(int input, int cutoff) {
 *   Button class definitions
 */
 
+customButton::customButton() {
+    s
+}
