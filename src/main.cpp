@@ -46,7 +46,7 @@ class robot {
 competition Competition;
 brain Brain;
 controller Controller;
-
+robot Robot;
 
 void pre_auton(void) {
   // Initializing Robot Configuration. DO NOT REMOVE!
@@ -63,6 +63,10 @@ void usercontrol(void) {
   // User control code here, inside the loop
   while (1) {
     
+    Robot.getUserInput();
+    Robot.updateMotors();
+
+
     wait(20, msec); // Sleep the task for a short amount of time to
                     // prevent wasted resources.
   }
