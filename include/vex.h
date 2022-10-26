@@ -17,17 +17,6 @@
 
 #include "robot-config.h"
 
-class robot
-{
-public:
-    // variables
-    motor motorFrontLeft;
-
-    // functions
-    robot(/* args */);
-    ~robot();
-};
-
 
 #define waitUntil(condition)                                                   \
   do {                                                                         \

@@ -13,10 +13,10 @@ using namespace vex;
 
 // ---- START VEXCODE CONFIGURED DEVICES ----
 
-motor frontLeftMotor = motor(PORT1, ratio18_1, false);
-motor backLeftMotor = motor(PORT2, ratio18_1, false);
-motor frontRightMotor = motor(PORT9, ratio18_1, true);
-motor backRightMotor = motor(PORT8, ratio18_1, true);
+motor frontLeftMotor = motor(PORT1, ratio18_1, true);
+motor backLeftMotor = motor(PORT2, ratio18_1, true);
+motor frontRightMotor = motor(PORT9, ratio18_1, false);
+motor backRightMotor = motor(PORT8, ratio18_1, false);
 
 motor_group leftMotorGroup = motor_group(frontLeftMotor, backLeftMotor);
 motor_group rightMotorGroup = motor_group(frontRightMotor, backRightMotor);
@@ -44,7 +44,6 @@ class robot {
 
 // A global instance of competition
 competition Competition;
-brain Brain;
 controller Controller;
 robot Robot;
 
@@ -112,8 +111,8 @@ void robot::updateScreen() {
 }
 
 void robot::getUserInput() {
-    leftDrive = processAxis(Controller.Axis1.value(), 5);
-    rightDrive = processAxis(Controller.Axis1.value(), 5);
+    leftDrive = processAxis(Controller.Axis3.value(), 5);
+    rightDrive = processAxis(Controller.Axis2.value(), 5);
 }
 
 int robot::processAxis(int input, int cutoff) {
