@@ -7,6 +7,10 @@
 /*                                                                            */
 /*----------------------------------------------------------------------------*/
 
+#include "vex.h"
+
+using namespace vex;
+
 // ---- START VEXCODE CONFIGURED DEVICES ----
 
 motor frontLeftMotor = motor(PORT1, ratio18_1, false);
@@ -19,10 +23,6 @@ motor_group rightMotorGroup = motor_group(frontRightMotor, backRightMotor);
 
 
 // ---- END VEXCODE CONFIGURED DEVICES ----
-
-#include "vex.h"
-
-using namespace vex;
 
 // Main Robot Class
 class robot {
