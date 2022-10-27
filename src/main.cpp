@@ -17,13 +17,37 @@ using std::string;
  *    ---- START VEXCODE CONFIGURED DEVICES ----
  */
 
+/*
+*   ----------  REFERENCE  ---------
+*   
+*   Gear Ratios:
+*       red, 100 rpm, ratio6_1
+*       green, 200 rpm, ratio18_1
+*       blue, 600 rpm, ratio36_1
+*       special black, max 3600 rpm, just set as blue but when need rpm multiply by 6
+*
+*/
+
+// Drive Motors
 motor frontLeftMotor = motor(PORT1, ratio18_1, true);
 motor backLeftMotor = motor(PORT2, ratio18_1, true);
 motor frontRightMotor = motor(PORT9, ratio18_1, false);
 motor backRightMotor = motor(PORT8, ratio18_1, false);
-
+// Drive Motor groups
 motor_group leftMotorGroup = motor_group(frontLeftMotor, backLeftMotor);
 motor_group rightMotorGroup = motor_group(frontRightMotor, backRightMotor);
+
+// Intake Motor
+motor intakeMotor = motor(PORT10, /*GREEN?*/ ratio18_1, false);
+// Roller Motor
+motor rollerMotor = motor(PORT11, /*GREEN?*/ ratio18_1, false);
+// Roller Motor
+motor launcherMotor = motor(PORT13, ratio36_1, false);
+// EndgameMotor
+motor endgameMotor = motor(PORT12, ratio6_1, false);
+
+// Pneumatics
+digital_out launcherPneumatics;
 
 /*
  *    ---- END VEXCODE CONFIGURED DEVICES ----
@@ -40,7 +64,9 @@ public:
 
     // functions
     robot();
-    void updateMotors();
+    void updateDriveMotors();
+    void updateRollerMotor();
+    void updateLaun
     void updateScreen();
     void getUserInput();
     int processAxis(int input, int cutoff);
@@ -60,32 +86,54 @@ public:
     // function
     customButton(bool toggle, std::string buttonName);
     void onPressInput();
-    bool checkRelease();
-    static void l1();
-    void l2();
-    void r1();
-    void r2();
+    void checkRelease();
+    bool isReleased();
 };
 
 /*
  *   Global Variables
  */
+
 competition Competition;
 controller Controller;
 robot Robot;
 
+// ENABLE TESTING MODE BOOL, SET TO FALSE WHEN AT COMPETITION
+// true = program calls either auto or manual at start
+// false = does nothing, waits for callbacks
+bool enableTesting = true;
+
+// is in competition
+bool inCompetition = true;
+
 // buttons
+void l1_press();
 customButton button_l1 = customButton(false, "l1");
+void l2_press();
+customButton button_l2 = customButton(false, "l2");
+void r1_press();
+customButton button_r1 = customButton(false, "r1");
+void r2_press();
+customButton button_r2 = customButton(false, "r2");
 
 // pre autononmous setup function
-
 void pre_auton(void)
 {
     // Initializing Robot Configuration. DO NOT REMOVE!
     vexcodeInit();
 
     // set keyboard callbacks
-    Controller.ButtonL1.pressed(button_l1.l1);
+    Controller.ButtonL1.pressed(l1_press);
+    Controller.ButtonL1.pressed(l2_press);
+    Controller.ButtonL1.pressed(r1_press);
+    Controller.ButtonL1.pressed(r2_press);
+
+    // is in competition
+    if (!Competition.isCompetitionSwitch() && !Competition.isFieldControl())
+    {
+        inCompetition = false;
+    }
+    
 }
 
 void autonomous(void)
@@ -99,10 +147,9 @@ void usercontrol(void)
     {
 
         Robot.getUserInput();
-        Robot.updateMotors();
+        Robot.updateDriveMotors();
 
-        wait(20, msec); // Sleep the task for a short amount of time to
-                        // prevent wasted resources.
+        wait(20, msec); // Sleep the task for a short amount of time to prevent wasted resources.
     }
 }
 
@@ -117,6 +164,13 @@ int main()
 
     // Run the pre-autonomous function.
     pre_auton();
+
+    // call manual if debug and testing
+    if (enableTesting && !inCompetition)
+    {
+        usercontrol();
+    }
+    
 
     // Prevent main from exiting with an infinite loop.
     while (true)
@@ -134,7 +188,7 @@ robot::robot()
 {
 }
 
-void robot::updateMotors()
+void robot::updateDriveMotors()
 {
     leftMotorGroup.setVelocity(leftDrive, percent);
     rightMotorGroup.setVelocity(rightDrive, percent);
@@ -151,6 +205,11 @@ void robot::getUserInput()
 {
     leftDrive = processAxis(Controller.Axis3.value(), 5);
     rightDrive = processAxis(Controller.Axis2.value(), 5);
+
+    button_l1.isReleased();
+    button_l2.isReleased();
+    button_r1.isReleased();
+    button_r2.isReleased();
 }
 
 int robot::processAxis(int input, int cutoff)
@@ -171,37 +230,58 @@ customButton::customButton(bool toggle, string buttonName_f)
     buttonName = buttonName_f;
 }
 
-bool customButton::checkRelease()
+bool customButton::isReleased()
 {
+    if (buttonName == "l1" && !Controller.ButtonL1.pressing())
+    {
+        return true;
+    }
+    else if (buttonName == "l2" && !Controller.ButtonL2.pressing())
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+void customButton::checkRelease() {
+    if (isReleased())
+    {
+        rawPressed = false;
+
+        if (!isToggle)
+        {
+            pressed = rawPressed;
+        }
+        
+    }
 }
 
 void customButton::onPressInput()
 {
+    rawPressed = true;
+
+    if (isToggle)
+    {
+        pressed != pressed;
+    } else {
+        pressed = rawPressed;
+    }
 }
 
-void customButton::l1()
-{
+void l1_press() {
+    button_l1.onPressInput();
 }
-void customButton::l2()
-{
-    if (buttonName == "l2")
-    {
-        rawPressed = true;
-    }
+void l2_press() {
+    button_l2.onPressInput();
 }
-void customButton::r1()
-{
-    if (buttonName == "r1")
-    {
-        rawPressed = true;
-    }
+void r1_press() {
+    button_r1.onPressInput();
 }
-void customButton::r2()
-{
-    if (buttonName == "r2")
-    {
-        rawPressed = true;
-    }
+void r2_press() {
+    button_r2.onPressInput();
 }
 
 // hi
