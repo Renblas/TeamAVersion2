@@ -14,10 +14,6 @@ using namespace vex;
 using std::string;
 
 /*
- *    ---- START VEXCODE CONFIGURED DEVICES ----
- */
-
-/*
 *   ----------  REFERENCE  ---------
 *   
 *   Gear Ratios:
@@ -26,7 +22,36 @@ using std::string;
 *       blue, 600 rpm, ratio36_1
 *       special black, max 3600 rpm, just set as blue but when need rpm multiply by 6
 *
+*   Controls:
+*       ---- Buttons on Back ----
+*       L1 - emergency untoggles intake and while held reverses intake, aka emergency clear
+*       L2 - Toggle, turns on intake and sucks disks (pun intended)
+*       R1 - Toggle, turns on disk launcher at current speed (default 85%)
+*       R2 - 
+*
+*       ---- Arrow Pad ----
+*       Up - Roller Motor Clockwise
+*       Down - Roller Motor Counter-Clockwise
+*       Left - Increase Disk Launcher Speed
+*       Right - Decrease Ddisk Launcher Speed
+*
+*       ---- Letter Pad ----
+*       X (top) - Launch disk if criteria are met
+*       B (bottom) - 
+*       Y (left) - 
+*       A (right) - Launch Endgame string thing
+*
+*       ---- Axis ----
+*       Axis 4 (Left Knob X-Direction) - 
+*       Axis 3 (Left Knob Y-Direction) - Left Drivetrain Motors fwd/back
+*       Axis 1 (Right Knob X-Direction) - 
+*       Axis 2 (Right Knob Y-Direction) - Right Drivetrain Motors fwd/back
+*
 */
+
+/*
+ *    ---- START VEXCODE CONFIGURED DEVICES ----
+ */
 
 // Drive Motors
 motor frontLeftMotor = motor(PORT1, ratio18_1, true);
@@ -38,9 +63,9 @@ motor_group leftMotorGroup = motor_group(frontLeftMotor, backLeftMotor);
 motor_group rightMotorGroup = motor_group(frontRightMotor, backRightMotor);
 
 // Intake Motor
-motor intakeMotor = motor(PORT10, /*GREEN?*/ ratio18_1, false);
+motor intakeMotor = motor(PORT10, ratio18_1, false);
 // Roller Motor
-motor rollerMotor = motor(PORT11, /*GREEN?*/ ratio18_1, false);
+motor rollerMotor = motor(PORT11, ratio18_1, false);
 // Roller Motor
 motor launcherMotor = motor(PORT13, ratio36_1, false);
 // EndgameMotor
@@ -57,16 +82,30 @@ digital_out launcherPneumatics;
 class robot
 {
 public:
-    // variables
-    int leftDrive;
-    int rightDrive;
-    bool totalDrive_Bool;
+    // Variables
+
+    // Drivetrain
+    int leftDrive = 0;
+    int rightDrive = 0;
+    bool straightDrive = false;
+    // Roller & Intake
+    bool enableRollerMotor = false;
+    bool rollerMotorReverse = false;
+    bool enableIntakeMotor = false;
+    bool intakeMotorReverse = false;
+    // Launcher
+    bool increaseLauncherSpeed = false;
+    bool decreaseLauncherSpeed = false;
+    bool enableDiskLauncherMotor = false;
+    bool launchDiskBool = false;
+    // Endgame
+    bool triggerEndgame = false;
 
     // functions
     robot();
     void updateDriveMotors();
     void updateRollerMotor();
-    void updateLauncher();
+    void updateLauncherMotor();
     void updateScreen();
     void getUserInput();
     int processAxis(int input, int cutoff);
@@ -106,7 +145,7 @@ bool enableTesting = true;
 // is in competition
 bool inCompetition = true;
 
-// buttons
+// Back Buttons
 void l1_press();
 customButton button_l1 = customButton(false, "l1");
 void l2_press();
@@ -115,6 +154,24 @@ void r1_press();
 customButton button_r1 = customButton(false, "r1");
 void r2_press();
 customButton button_r2 = customButton(false, "r2");
+// Arrow buttons
+void up_press();
+customButton button_up = customButton(false, "up");
+void down_press();
+customButton button_down = customButton(false, "down");
+void left_press();
+customButton button_left = customButton(false, "left");
+void right_press();
+customButton button_right = customButton(false, "right");
+// Letter Buttons
+void x_press();
+customButton button_x = customButton(false, "x");
+void b_press();
+customButton button_b = customButton(false, "b");
+void y_press();
+customButton button_y = customButton(false, "y");
+void a_press();
+customButton button_a = customButton(false, "a");
 
 // pre autononmous setup function
 void pre_auton(void)
@@ -124,9 +181,17 @@ void pre_auton(void)
 
     // set keyboard callbacks
     Controller.ButtonL1.pressed(l1_press);
-    Controller.ButtonL1.pressed(l2_press);
-    Controller.ButtonL1.pressed(r1_press);
-    Controller.ButtonL1.pressed(r2_press);
+    Controller.ButtonL2.pressed(l2_press);
+    Controller.ButtonR1.pressed(r1_press);
+    //Controller.ButtonR2.pressed(r2_press);
+    Controller.ButtonUp.pressed(up_press);
+    Controller.ButtonDown.pressed(down_press);
+    Controller.ButtonLeft.pressed(left_press);
+    Controller.ButtonRight.pressed(right_press);
+    Controller.ButtonX.pressed(x_press);
+    //Controller.ButtonB.pressed(b_press);
+    //Controller.ButtonY.pressed(y_press);
+    Controller.ButtonA.pressed(a_press);
 
     // is in competition
     if (!Competition.isCompetitionSwitch() && !Competition.isFieldControl())
@@ -196,22 +261,60 @@ void robot::updateDriveMotors()
     leftMotorGroup.spin(fwd);
     rightMotorGroup.spin(fwd);
 }
+void robot::updateLauncherMotor() {
 
-void robot::updateScreen()
-{
 }
-
+void robot::updateRollerMotor() {
+    if (enableRollerMotor)
+    {
+        rollerMotor.setVelocity(100, percent);
+    }
+    else if (rollerMotorReverse)
+    {
+        rollerMotor.setVelocity(-100, percent);
+    } 
+    else
+    {
+        rollerMotor.setVelocity(0, percent);
+    }
+    rollerMotor.spin(fwd);
+}
 void robot::getUserInput()
 {
+    // Arrow Button Input 
+    enableRollerMotor = button_up.pressed;
+    rollerMotorReverse = button_down.pressed;
+    increaseLauncherSpeed = button_left.pressed;
+    decreaseLauncherSpeed = button_right.pressed;
+    // Back Button Input
+    enableIntakeMotor = button_l2.pressed;
+    intakeMotorReverse = button_l1.pressed;
+    enableDiskLauncherMotor = button_r1.pressed;
+
+    // Letter Buttons
+    launchDiskBool = button_x.pressed;
+    triggerEndgame = button_a.pressed;
+
+
+    // Axis Input
     leftDrive = processAxis(Controller.Axis3.value(), 5);
     rightDrive = processAxis(Controller.Axis2.value(), 5);
 
+    // check buttons
     button_l1.isReleased();
     button_l2.isReleased();
     button_r1.isReleased();
     button_r2.isReleased();
+    button_up.isReleased();
+    button_down.isReleased();
+    button_left.isReleased();
+    button_right.isReleased();
+    //button_x.isReleased();
+    //button_y.isReleased();
+    button_a.isReleased();
+    button_b.isReleased();
+    
 }
-
 int robot::processAxis(int input, int cutoff)
 {
     float result = input;
@@ -237,6 +340,14 @@ bool customButton::isReleased()
         return true;
     }
     else if (buttonName == "l2" && !Controller.ButtonL2.pressing())
+    {
+        return true;
+    }
+    else if (buttonName == "r1" && !Controller.ButtonR1.pressing())
+    {
+        return true;
+    }
+    else if (buttonName == "r2" && !Controller.ButtonR2.pressing())
     {
         return true;
     }
@@ -271,6 +382,11 @@ void customButton::onPressInput()
     }
 }
 
+
+
+
+// Button Callback Functions
+
 void l1_press() {
     button_l1.onPressInput();
 }
@@ -282,6 +398,30 @@ void r1_press() {
 }
 void r2_press() {
     button_r2.onPressInput();
+}
+void up_press() {
+    button_up.onPressInput();
+}
+void down_press() {
+    button_down.onPressInput();
+}
+void left_press() {
+    button_left.onPressInput();
+}
+void right_press() {
+    button_right.onPressInput();
+}
+void x_press() {
+    button_x.onPressInput();
+}
+void b_press() {
+    button_b.onPressInput();
+}
+void y_press() {
+    button_y.onPressInput();
+}
+void a_press() {
+    button_a.onPressInput();
 }
 
 // hi
