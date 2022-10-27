@@ -66,7 +66,7 @@ public:
     robot();
     void updateDriveMotors();
     void updateRollerMotor();
-    void updateLaun
+    void updateLauncher();
     void updateScreen();
     void getUserInput();
     int processAxis(int input, int cutoff);
