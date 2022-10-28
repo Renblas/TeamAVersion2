@@ -1,6 +1,6 @@
 # TeamAVersion2
 
-the c++ file with the code is in /src
+main.cpp is the file with the code, is in /src
 
 ----------  REFERENCE  ---------
 
