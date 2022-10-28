@@ -16,6 +16,12 @@ using std::string;
 /*
  *   ----------  REFERENCE  ---------
  *
+ *   TODO:
+ *      - untoggle inputs based on other inputs
+ *      - firing code
+ *      - pnuematics
+ *      - print variables to screen
+ *
  *   Gear Ratios:
  *       red, 100 rpm, ratio6_1
  *       green, 200 rpm, ratio18_1
