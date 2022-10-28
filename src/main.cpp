@@ -18,7 +18,11 @@ using std::string;
  *
  *   TODO:
  *      - pnuematics
- *      - print variables to screen
+ *      Minor Stuff:
+ *      - print launcher motor speed to controller screen
+ *      - switch roller motor to red?
+ *      - draw kewl image to brain screen
+ *          - REMEMBER SD CARD!
  *
  *   Gear Ratios:
  *       red, 100 rpm, ratio6_1
