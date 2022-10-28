@@ -1,5 +1,7 @@
 # TeamAVersion2
 
+the c++ file with the code is in /src
+
 ----------  REFERENCE  ---------
 
     TODO:
