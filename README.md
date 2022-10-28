@@ -10,7 +10,7 @@
         Minor Stuff:
         - print launcher motor speed to controller screen
         - switch roller motor to red?
-            - draw kewl image to brain screen
+        - draw kewl image to brain screen
             - REMEMBER SD CARD!
             
 
