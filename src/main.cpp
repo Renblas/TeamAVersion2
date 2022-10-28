@@ -31,9 +31,9 @@ motor intakeMotor = motor(PORT10, ratio18_1, false);
 // Roller Motor
 motor rollerMotor = motor(PORT11, ratio18_1, false);
 // Roller Motor
-motor launcherMotor = motor(PORT13, ratio36_1, false);
+motor launcherMotor = motor(PORT3, ratio36_1, true);
 // EndgameMotor
-motor endgameMotor = motor(PORT12, ratio6_1, false);
+motor endgameMotor = motor(PORT4, ratio6_1, false);
 
 // Pneumatics
 //digital_out launcherPneumatics = digital_out(Brain.ThreeWirePort.A);
@@ -75,7 +75,8 @@ public:
     int disksLaunched = 0;
 
     // Endgame
-    bool triggerEndgame = false;
+    bool enableEndgame = false;
+    bool enableEndgameReverse = false;
 
     // ----- Functions -----
 
@@ -102,7 +103,7 @@ public:
     // applies input to launcher motor
     void updateLauncherMotor();
     // Trigger Endgame
-    void triggerEndgameLauncher();
+    void updateEndgameLauncher();
     // screen not currently used
     // void updateScreen();
     // update controller screen, not currently used
@@ -122,7 +123,7 @@ public:
     // ----- Variables -----
     bool isToggle = false;
     bool rawPressed = false;
-    bool pressed = true;
+    bool pressed = false;
 
     std::string buttonName;
 
@@ -149,7 +150,7 @@ robot Robot;
 // ENABLE TESTING MODE BOOL, SET TO FALSE WHEN AT COMPETITION
 // true = program calls either auto or manual at start
 // false = does nothing, waits for callbacks
-bool enableTesting = false;
+bool enableTesting = true;
 
 // is in competition
 bool inCompetition = true;
@@ -279,17 +280,12 @@ void robot::updateUserControl()
     Robot.updateRollerMotor();
     Robot.updateLauncherMotor();
     Robot.firingProtocol();
-
-    if (triggerEndgame)
-    {
-        triggerEndgameLauncher();
-    }
+    Robot.updateEndgameLauncher();
 }
 void robot::getUserInput()
 {
     // Arrow Button Input
-    enableRollerMotor = button_up.pressed;
-    rollerMotorReverse = button_down.pressed;
+    enableRollerMotor = button_r2.pressed;
     increaseLauncherSpeed = button_left.pressed;
     decreaseLauncherSpeed = button_right.pressed;
     // Back Button Input
@@ -299,13 +295,9 @@ void robot::getUserInput()
 
     // Letter Buttons
     launchDiskBool = button_x.pressed;
-    triggerEndgame = button_a.pressed;
+    enableEndgame = button_up.pressed;
+    enableEndgameReverse = button_down.pressed;
 
-    if (rollerMotorReverse && enableRollerMotor)
-    {
-        enableRollerMotor = false;
-        button_up.pressed = false;
-    }
     if (intakeMotorReverse && enableIntakeMotor)
     {
         enableIntakeMotor = false;
@@ -317,18 +309,18 @@ void robot::getUserInput()
     rightDrive = processAxis(Controller.Axis2.value(), 5);
 
     // check buttons
-    button_l1.isReleased();
-    button_l2.isReleased();
-    button_r1.isReleased();
-    button_r2.isReleased();
-    button_up.isReleased();
-    button_down.isReleased();
-    button_left.isReleased();
-    button_right.isReleased();
-    // button_x.isReleased();
-    // button_y.isReleased();
-    button_a.isReleased();
-    button_b.isReleased();
+    button_l1.checkRelease();
+    button_l2.checkRelease();
+    button_r1.checkRelease();
+    button_r2.checkRelease();
+    button_up.checkRelease();
+    button_down.checkRelease();
+    button_left.checkRelease();
+    button_right.checkRelease();
+    // button_x.checkRelease();
+    // button_y.checkRelease();
+    button_a.checkRelease();
+    button_b.checkRelease();
 }
 int robot::processAxis(int input, int cutoff)
 {
@@ -374,7 +366,7 @@ void robot::updateDriveMotors()
     leftMotorGroup.spin(fwd);
     rightMotorGroup.spin(fwd);
 }
-void robot::adjustLauncherMotor()
+/*void robot::adjustLauncherMotor()
 {
     if (increaseLauncherSpeed)
     {
@@ -384,10 +376,10 @@ void robot::adjustLauncherMotor()
     {
         launcherSpeed -= launcherSpeed_adjustPerSecond / 50;
     }
-}
+}*/
 void robot::updateLauncherMotor()
 {
-    adjustLauncherMotor();
+    //adjustLauncherMotor();
     if (enableDiskLauncherMotor)
     {
         launcherMotor.setVelocity(launcherSpeed, percent);
@@ -430,10 +422,21 @@ void robot::updateIntakeMotor()
     }
     intakeMotor.spin(fwd);
 }
-void robot::triggerEndgameLauncher()
+void robot::updateEndgameLauncher()
 {
-    endgameMotor.setVelocity(50, rpm);
-    endgameMotor.spinFor(90, degrees, true);
+    if (enableEndgame)
+    {
+        endgameMotor.setVelocity(100, percent);
+    }
+    else if (enableEndgameReverse)
+    {
+        endgameMotor.setVelocity(-100, percent);
+    }
+    else
+    {
+        endgameMotor.setVelocity(0, percent);
+    }
+    endgameMotor.spin(fwd);
 }
 void robot::auto3Side()
 {
@@ -497,6 +500,7 @@ void customButton::checkRelease()
 }
 void customButton::onPressInput()
 {
+    Brain.Screen.printAt(0, 1, "Pressed");
     rawPressed = true;
 
     if (isToggle)

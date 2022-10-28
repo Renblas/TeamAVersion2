@@ -17,8 +17,8 @@ main.cpp is the file with the code, is in /src
             
 
     Gear Ratios:
-        red, 100 rpm, ratio6_1
-        green, 200 rpm, ratio18_1
+        red, 200 rpm, ratio6_1
+        green, 400 rpm, ratio18_1
         blue, 600 rpm, ratio36_1
         special black, max 3600 rpm, just set as blue but when need rpm multiply by 6
 
@@ -28,19 +28,19 @@ main.cpp is the file with the code, is in /src
         L1 - emergency untoggles intake and while held reverses intake, aka emergency clear
         L2 - Toggle, turns on intake and sucks disks (pun intended)
         R1 - Toggle, turns on disk launcher at current speed (default 85%)
-        R2 -
+        R2 - Roller Motor Clockwise
 
         ---- Arrow Pad ----
-        Up - Roller Motor Clockwise
-        Down - Roller Motor Counter-Clockwise
-        Left - Increase Disk Launcher Speed
-        Right - Decrease Ddisk Launcher Speed
+        Up - Endgame string thing clockwise, launch
+        Down - Endgame string thing clockwise, reset
+        Left - 
+        Right - 
 
         ---- Letter Pad ----
         X (top) - Launch disk if criteria are met
         B (bottom) -
         Y (left) -
-        A (right) - Launch Endgame string thing
+        A (right) - 
 
         ---- Axis ----
         Axis 4 (Left Knob X-Direction) -
