@@ -14,50 +14,6 @@ using namespace vex;
 using std::string;
 
 /*
- *   ----------  REFERENCE  ---------
- *
- *   TODO:
- *      - pnuematics
- *      Minor Stuff:
- *      - print launcher motor speed to controller screen
- *      - switch roller motor to red?
- *      - draw kewl image to brain screen
- *          - REMEMBER SD CARD!
- *
- *   Gear Ratios:
- *       red, 100 rpm, ratio6_1
- *       green, 200 rpm, ratio18_1
- *       blue, 600 rpm, ratio36_1
- *       special black, max 3600 rpm, just set as blue but when need rpm multiply by 6
- *
- *   Controls:
- *       ---- Buttons on Back ----
- *       L1 - emergency untoggles intake and while held reverses intake, aka emergency clear
- *       L2 - Toggle, turns on intake and sucks disks (pun intended)
- *       R1 - Toggle, turns on disk launcher at current speed (default 85%)
- *       R2 -
- *
- *       ---- Arrow Pad ----
- *       Up - Roller Motor Clockwise
- *       Down - Roller Motor Counter-Clockwise
- *       Left - Increase Disk Launcher Speed
- *       Right - Decrease Ddisk Launcher Speed
- *
- *       ---- Letter Pad ----
- *       X (top) - Launch disk if criteria are met
- *       B (bottom) -
- *       Y (left) -
- *       A (right) - Launch Endgame string thing
- *
- *       ---- Axis ----
- *       Axis 4 (Left Knob X-Direction) -
- *       Axis 3 (Left Knob Y-Direction) - Left Drivetrain Motors fwd/back
- *       Axis 1 (Right Knob X-Direction) -
- *       Axis 2 (Right Knob Y-Direction) - Right Drivetrain Motors fwd/back
- *
- */
-
-/*
  *    ---- START VEXCODE CONFIGURED DEVICES ----
  */
 
@@ -80,8 +36,7 @@ motor launcherMotor = motor(PORT13, ratio36_1, false);
 motor endgameMotor = motor(PORT12, ratio6_1, false);
 
 // Pneumatics
-// triport ThreeWirePort = vex::triport(PORT22);
-// digital_out launcherPneumatics = digital_out(Brain.ThreeWirePort.A);
+
 
 /*
  *    ---- END VEXCODE CONFIGURED DEVICES ----
@@ -115,6 +70,7 @@ public:
     float diskTimer_max = pistonEnabledTime + pistonRetractTime;
     float launcherMotorMinSpeed = 0.9;
     bool launchDiskBool = false;
+    int disksLaunched = 0;
 
     // Endgame
     bool triggerEndgame = false;
@@ -123,6 +79,8 @@ public:
 
     // constructor
     robot();
+    // reset all variables to default
+    void resetToDefault();
     // general function for all of user control stuff
     void updateUserControl();
     // gets input from button objects / axis
@@ -141,10 +99,18 @@ public:
     void adjustLauncherMotor();
     // applies input to launcher motor
     void updateLauncherMotor();
+    // Trigger Endgame
+    void triggerEndgameLauncher();
     // screen not currently used
     // void updateScreen();
     // update controller screen, not currently used
     // void updateControllerScreen();
+
+    // ----- Autonomous ----- 
+    // assume start on 3-side; gets roller and launch 2 disk
+    void auto3Side();
+    // assume start on 2-side, perpendicular to roller; gets roller and launch 2 disk
+    void auto2Side();
 };
 
 // custom button class
@@ -290,6 +256,9 @@ int main()
 robot::robot()
 {
 }
+void robot::resetToDefault() {
+
+}
 void robot::updateUserControl()
 {
     Robot.getUserInput();
@@ -299,9 +268,9 @@ void robot::updateUserControl()
     Robot.updateLauncherMotor();
     Robot.firingProtocol();
 
-    if (/* condition */ false)
+    if (triggerEndgame)
     {
-        // do endgame
+        triggerEndgameLauncher();
     }
 }
 void robot::getUserInput()
@@ -368,6 +337,7 @@ void robot::firingProtocol()
             if (launchDiskBool)
             {
                 // PNEUMATICS = TRUE
+                disksLaunched += 1;
                 diskTimer = diskTimer_max;
             }
         }
@@ -447,6 +417,20 @@ void robot::updateIntakeMotor()
     }
     intakeMotor.spin(fwd);
 }
+void robot::triggerEndgameLauncher()
+{
+    endgameMotor.setVelocity(50, rpm);
+    endgameMotor.spinFor(90, degrees, true);
+}
+void robot::auto3Side()
+{
+
+}
+void robot::auto2Side()
+{
+    
+}
+
 
 /*
  *   Button class definitions
