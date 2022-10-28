@@ -36,8 +36,7 @@ motor launcherMotor = motor(PORT3, ratio36_1, true);
 motor endgameMotor = motor(PORT4, ratio6_1, false);
 
 // Pneumatics
-//digital_out launcherPneumatics = digital_out(Brain.ThreeWirePort.A);
-//launcherPneumatics.set(true);
+digital_out launcherPneumatics = digital_out(Brain.ThreeWirePort.A);
 
 
 /*
@@ -247,6 +246,8 @@ int main()
 
     // Run the pre-autonomous function.
     pre_auton();
+
+    launcherPneumatics.set(true);
 
     // call manual if debug and testing
     if (enableTesting && !inCompetition)
