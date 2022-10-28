@@ -1,98 +1,550 @@
 /*----------------------------------------------------------------------------*/
 /*                                                                            */
 /*    Module:       main.cpp                                                  */
-/*    Author:       VEX                                                       */
+/*    Author:       ur mom                                                    */
 /*    Created:      Thu Sep 26 2019                                           */
 /*    Description:  Competition Template                                      */
 /*                                                                            */
 /*----------------------------------------------------------------------------*/
 
-// ---- START VEXCODE CONFIGURED DEVICES ----
-// ---- END VEXCODE CONFIGURED DEVICES ----
-
 #include "vex.h"
+#include <string>
 
 using namespace vex;
+using std::string;
 
-// A global instance of competition
+/*
+ *    ---- START VEXCODE CONFIGURED DEVICES ----
+ */
+
+// Drive Motors
+motor frontLeftMotor = motor(PORT1, ratio18_1, true);
+motor backLeftMotor = motor(PORT2, ratio18_1, true);
+motor frontRightMotor = motor(PORT9, ratio18_1, false);
+motor backRightMotor = motor(PORT8, ratio18_1, false);
+// Drive Motor groups
+motor_group leftMotorGroup = motor_group(frontLeftMotor, backLeftMotor);
+motor_group rightMotorGroup = motor_group(frontRightMotor, backRightMotor);
+
+// Intake Motor
+motor intakeMotor = motor(PORT10, ratio18_1, false);
+// Roller Motor
+motor rollerMotor = motor(PORT11, ratio18_1, false);
+// Roller Motor
+motor launcherMotor = motor(PORT13, ratio36_1, false);
+// EndgameMotor
+motor endgameMotor = motor(PORT12, ratio6_1, false);
+
+// Pneumatics
+
+
+/*
+ *    ---- END VEXCODE CONFIGURED DEVICES ----
+ */
+
+//  Main Robot Class
+class robot
+{
+public:
+    // ----- Variables -----
+
+    // Drivetrain
+    int leftDrive = 0;
+    int rightDrive = 0;
+    // bool straightDrive = false;
+    //  Roller & Intake
+    bool enableRollerMotor = false;
+    bool rollerMotorReverse = false;
+    bool enableIntakeMotor = false;
+    bool intakeMotorReverse = false;
+    // Launcher Motor
+    bool increaseLauncherSpeed = false;
+    bool decreaseLauncherSpeed = false;
+    float launcherSpeed_adjustPerSecond = 50;
+    float launcherSpeed = 85;
+    bool enableDiskLauncherMotor = false;
+    // fire disk stuff
+    float diskTimer = 0;
+    float pistonEnabledTime = 0.25;
+    float pistonRetractTime = 1;
+    float diskTimer_max = pistonEnabledTime + pistonRetractTime;
+    float launcherMotorMinSpeed = 0.9;
+    bool launchDiskBool = false;
+    int disksLaunched = 0;
+
+    // Endgame
+    bool triggerEndgame = false;
+
+    // ----- Functions -----
+
+    // constructor
+    robot();
+    // reset all variables to default
+    void resetToDefault();
+    // general function for all of user control stuff
+    void updateUserControl();
+    // gets input from button objects / axis
+    void getUserInput();
+    // Process axis for reasons
+    int processAxis(int input, int cutoff);
+    // firing checklist for firing a disk
+    void firingProtocol();
+    // applies input to drivechain motors
+    void updateDriveMotors();
+    // applies input to roller motor
+    void updateRollerMotor();
+    // applies input to intake motor
+    void updateIntakeMotor();
+    // makes adjustments to Launcher motor speed, automatically called by updateLauncherMotor()
+    void adjustLauncherMotor();
+    // applies input to launcher motor
+    void updateLauncherMotor();
+    // Trigger Endgame
+    void triggerEndgameLauncher();
+    // screen not currently used
+    // void updateScreen();
+    // update controller screen, not currently used
+    // void updateControllerScreen();
+
+    // ----- Autonomous ----- 
+    // assume start on 3-side; gets roller and launch 2 disk
+    void auto3Side();
+    // assume start on 2-side, perpendicular to roller; gets roller and launch 2 disk
+    void auto2Side();
+};
+
+// custom button class
+class customButton
+{
+public:
+    // ----- Variables -----
+    bool isToggle = false;
+    bool rawPressed = false;
+    bool pressed = true;
+
+    std::string buttonName;
+
+    // ----- Functions -----
+
+    // constructor
+    customButton(bool toggle, std::string buttonName);
+    // function called when callback occurs
+    void onPressInput();
+    // called once per frame, holds logic for if it is realeased
+    void checkRelease();
+    // called by above, is master list for determining if button is being pressed
+    bool isReleased();
+};
+
+/*
+ *   Global Variables
+ */
+
 competition Competition;
+controller Controller;
+robot Robot;
 
-// define your global instances of motors and other devices here
+// ENABLE TESTING MODE BOOL, SET TO FALSE WHEN AT COMPETITION
+// true = program calls either auto or manual at start
+// false = does nothing, waits for callbacks
+bool enableTesting = true;
 
-/*---------------------------------------------------------------------------*/
-/*                          Pre-Autonomous Functions                         */
-/*                                                                           */
-/*  You may want to perform some actions before the competition starts.      */
-/*  Do them in the following function.  You must return from this function   */
-/*  or the autonomous and usercontrol tasks will not be started.  This       */
-/*  function is only called once after the V5 has been powered on and        */
-/*  not every time that the robot is disabled.                               */
-/*---------------------------------------------------------------------------*/
+// is in competition
+bool inCompetition = true;
 
-void pre_auton(void) {
-  // Initializing Robot Configuration. DO NOT REMOVE!
-  vexcodeInit();
+// Every button has its own object and global function, global function is for callbacks
 
-  // All activities that occur before the competition starts
-  // Example: clearing encoders, setting servo positions, ...
+// Back Buttons
+void l1_press();
+customButton button_l1 = customButton(false, "l1");
+void l2_press();
+customButton button_l2 = customButton(true, "l2");
+void r1_press();
+customButton button_r1 = customButton(true, "r1");
+void r2_press();
+customButton button_r2 = customButton(false, "r2");
+// Arrow buttons
+void up_press();
+customButton button_up = customButton(false, "up");
+void down_press();
+customButton button_down = customButton(false, "down");
+void left_press();
+customButton button_left = customButton(false, "left");
+void right_press();
+customButton button_right = customButton(false, "right");
+// Letter Buttons
+void x_press();
+customButton button_x = customButton(false, "x");
+void b_press();
+customButton button_b = customButton(false, "b");
+void y_press();
+customButton button_y = customButton(false, "y");
+void a_press();
+customButton button_a = customButton(false, "a");
+
+// pre autononmous setup function
+void pre_auton(void)
+{
+    // Initializing Robot Configuration. DO NOT REMOVE!
+    vexcodeInit();
+
+    // set keyboard callbacks
+    Controller.ButtonL1.pressed(l1_press);
+    Controller.ButtonL2.pressed(l2_press);
+    Controller.ButtonR1.pressed(r1_press);
+    // Controller.ButtonR2.pressed(r2_press);
+    Controller.ButtonUp.pressed(up_press);
+    Controller.ButtonDown.pressed(down_press);
+    Controller.ButtonLeft.pressed(left_press);
+    Controller.ButtonRight.pressed(right_press);
+    Controller.ButtonX.pressed(x_press);
+    // Controller.ButtonB.pressed(b_press);
+    // Controller.ButtonY.pressed(y_press);
+    Controller.ButtonA.pressed(a_press);
+
+    // is in competition
+    if (!Competition.isCompetitionSwitch() && !Competition.isFieldControl())
+    {
+        inCompetition = false;
+    }
 }
 
-/*---------------------------------------------------------------------------*/
-/*                                                                           */
-/*                              Autonomous Task                              */
-/*                                                                           */
-/*  This task is used to control your robot during the autonomous phase of   */
-/*  a VEX Competition.                                                       */
-/*                                                                           */
-/*  You must modify the code to add your own robot specific commands here.   */
-/*---------------------------------------------------------------------------*/
-
-void autonomous(void) {
-  // ..........................................................................
-  // Insert autonomous user code here.
-  // ..........................................................................
+void autonomous(void)
+{
 }
 
-/*---------------------------------------------------------------------------*/
-/*                                                                           */
-/*                              User Control Task                            */
-/*                                                                           */
-/*  This task is used to control your robot during the user control phase of */
-/*  a VEX Competition.                                                       */
-/*                                                                           */
-/*  You must modify the code to add your own robot specific commands here.   */
-/*---------------------------------------------------------------------------*/
+void usercontrol(void)
+{
+    while (1)
+    {
+        Robot.updateUserControl();
 
-void usercontrol(void) {
-  // User control code here, inside the loop
-  while (1) {
-    // This is the main execution loop for the user control program.
-    // Each time through the loop your program should update motor + servo
-    // values based on feedback from the joysticks.
-
-    // ........................................................................
-    // Insert user code here. This is where you use the joystick values to
-    // update your motors, etc.
-    // ........................................................................
-
-    wait(20, msec); // Sleep the task for a short amount of time to
-                    // prevent wasted resources.
-  }
+        wait(20, msec); // Sleep the task for a short amount of time to prevent wasted resources.
+    }
 }
 
-//
-// Main will set up the competition functions and callbacks.
-//
-int main() {
-  // Set up callbacks for autonomous and driver control periods.
-  Competition.autonomous(autonomous);
-  Competition.drivercontrol(usercontrol);
+/*
+ * Main will set up the competition functions and callbacks.
+ */
+int main()
+{
+    // Set up callbacks for autonomous and driver control periods.
+    Competition.autonomous(autonomous);
+    Competition.drivercontrol(usercontrol);
 
-  // Run the pre-autonomous function.
-  pre_auton();
+    // Run the pre-autonomous function.
+    pre_auton();
 
-  // Prevent main from exiting with an infinite loop.
-  while (true) {
-    wait(100, msec);
-  }
+    // call manual if debug and testing
+    if (enableTesting && !inCompetition)
+    {
+        usercontrol();
+    }
+
+    // Prevent main from exiting with an infinite loop.
+    while (true)
+    {
+        wait(100, msec);
+    }
 }
+
+/*
+ *   Robot Class Definitions
+ */
+
+// Constructor definition outside the class
+robot::robot()
+{
+}
+void robot::resetToDefault() {
+
+}
+void robot::updateUserControl()
+{
+    Robot.getUserInput();
+    Robot.updateDriveMotors();
+    Robot.updateIntakeMotor();
+    Robot.updateRollerMotor();
+    Robot.updateLauncherMotor();
+    Robot.firingProtocol();
+
+    if (triggerEndgame)
+    {
+        triggerEndgameLauncher();
+    }
+}
+void robot::getUserInput()
+{
+    // Arrow Button Input
+    enableRollerMotor = button_up.pressed;
+    rollerMotorReverse = button_down.pressed;
+    increaseLauncherSpeed = button_left.pressed;
+    decreaseLauncherSpeed = button_right.pressed;
+    // Back Button Input
+    enableIntakeMotor = button_l2.pressed;
+    intakeMotorReverse = button_l1.pressed;
+    enableDiskLauncherMotor = button_r1.pressed;
+
+    // Letter Buttons
+    launchDiskBool = button_x.pressed;
+    triggerEndgame = button_a.pressed;
+
+    if (rollerMotorReverse && enableRollerMotor)
+    {
+        enableRollerMotor = false;
+        button_up.pressed = false;
+    }
+    if (intakeMotorReverse && enableIntakeMotor)
+    {
+        enableIntakeMotor = false;
+        button_l2.pressed = false;
+    }
+
+    // Axis Input
+    leftDrive = processAxis(Controller.Axis3.value(), 5);
+    rightDrive = processAxis(Controller.Axis2.value(), 5);
+
+    // check buttons
+    button_l1.isReleased();
+    button_l2.isReleased();
+    button_r1.isReleased();
+    button_r2.isReleased();
+    button_up.isReleased();
+    button_down.isReleased();
+    button_left.isReleased();
+    button_right.isReleased();
+    // button_x.isReleased();
+    // button_y.isReleased();
+    button_a.isReleased();
+    button_b.isReleased();
+}
+int robot::processAxis(int input, int cutoff)
+{
+    float result = input;
+    if (result <= cutoff && result >= -cutoff)
+        result = 0;
+    return result;
+}
+void robot::firingProtocol()
+{
+    // if diskTimer is at 0, proceed; else count down timer
+    if (diskTimer <= 0)
+    {
+        // if launcher motor is enabled AND the current velocity is X percent of set speed, proceed
+        if (enableDiskLauncherMotor && launcherMotor.velocity(percent) >= launcherMotorMinSpeed * (launcherSpeed / 600))
+        {
+            // if you actually want to fire disk, proceed
+            if (launchDiskBool)
+            {
+                // PNEUMATICS = TRUE
+                disksLaunched += 1;
+                diskTimer = diskTimer_max;
+            }
+        }
+    }
+    else
+    {
+        diskTimer -= 1 * (20 / 1000);
+    }
+
+    // if timer is less than time needed to extend, retract
+    if (diskTimer <= diskTimer_max - pistonEnabledTime)
+    {
+        // PNEUMATICS = FALSE
+    }
+}
+void robot::updateDriveMotors()
+{
+    leftMotorGroup.setVelocity(leftDrive, percent);
+    rightMotorGroup.setVelocity(rightDrive, percent);
+
+    leftMotorGroup.spin(fwd);
+    rightMotorGroup.spin(fwd);
+}
+void robot::adjustLauncherMotor()
+{
+    if (increaseLauncherSpeed)
+    {
+        launcherSpeed += launcherSpeed_adjustPerSecond / 50;
+    }
+    if (decreaseLauncherSpeed)
+    {
+        launcherSpeed -= launcherSpeed_adjustPerSecond / 50;
+    }
+}
+void robot::updateLauncherMotor()
+{
+    adjustLauncherMotor();
+    if (enableDiskLauncherMotor)
+    {
+        launcherMotor.setVelocity(launcherSpeed, percent);
+    }
+    else
+    {
+        launcherMotor.setVelocity(0, percent);
+    }
+    launcherMotor.spin(fwd);
+}
+void robot::updateRollerMotor()
+{
+    if (enableRollerMotor)
+    {
+        rollerMotor.setVelocity(100, percent);
+    }
+    else if (rollerMotorReverse)
+    {
+        rollerMotor.setVelocity(-100, percent);
+    }
+    else
+    {
+        rollerMotor.setVelocity(0, percent);
+    }
+    rollerMotor.spin(fwd);
+}
+void robot::updateIntakeMotor()
+{
+    if (enableIntakeMotor)
+    {
+        intakeMotor.setVelocity(100, percent);
+    }
+    else if (intakeMotorReverse)
+    {
+        intakeMotor.setVelocity(-100, percent);
+    }
+    else
+    {
+        intakeMotor.setVelocity(0, percent);
+    }
+    intakeMotor.spin(fwd);
+}
+void robot::triggerEndgameLauncher()
+{
+    endgameMotor.setVelocity(50, rpm);
+    endgameMotor.spinFor(90, degrees, true);
+}
+void robot::auto3Side()
+{
+
+}
+void robot::auto2Side()
+{
+    
+}
+
+
+/*
+ *   Button class definitions
+ */
+
+customButton::customButton(bool toggle, string buttonName_f)
+{
+    isToggle = toggle;
+    buttonName = buttonName_f;
+}
+bool customButton::isReleased()
+{
+    if (buttonName == "l1" && !Controller.ButtonL1.pressing())
+        return true;
+    else if (buttonName == "l2" && !Controller.ButtonL2.pressing())
+        return true;
+    else if (buttonName == "r1" && !Controller.ButtonR1.pressing())
+        return true;
+    else if (buttonName == "r2" && !Controller.ButtonR2.pressing())
+        return true;
+    else if (buttonName == "up" && !Controller.ButtonUp.pressing())
+        return true;
+    else if (buttonName == "down" && !Controller.ButtonDown.pressing())
+        return true;
+    else if (buttonName == "left" && !Controller.ButtonLeft.pressing())
+        return true;
+    else if (buttonName == "right" && !Controller.ButtonRight.pressing())
+        return true;
+    else if (buttonName == "x" && !Controller.ButtonX.pressing())
+        return true;
+    else if (buttonName == "y" && !Controller.ButtonY.pressing())
+        return true;
+    else if (buttonName == "a" && !Controller.ButtonA.pressing())
+        return true;
+    else if (buttonName == "b" && !Controller.ButtonB.pressing())
+        return true;
+    else
+        return false;
+}
+void customButton::checkRelease()
+{
+    if (isReleased())
+    {
+        rawPressed = false;
+
+        if (!isToggle)
+        {
+            pressed = rawPressed;
+        }
+    }
+}
+void customButton::onPressInput()
+{
+    rawPressed = true;
+
+    if (isToggle)
+    {
+        pressed = !pressed;
+    }
+    else
+    {
+        pressed = rawPressed;
+    }
+}
+
+// Button Callback Functions
+
+void l1_press()
+{
+    button_l1.onPressInput();
+}
+void l2_press()
+{
+    button_l2.onPressInput();
+}
+void r1_press()
+{
+    button_r1.onPressInput();
+}
+void r2_press()
+{
+    button_r2.onPressInput();
+}
+void up_press()
+{
+    button_up.onPressInput();
+}
+void down_press()
+{
+    button_down.onPressInput();
+}
+void left_press()
+{
+    button_left.onPressInput();
+}
+void right_press()
+{
+    button_right.onPressInput();
+}
+void x_press()
+{
+    button_x.onPressInput();
+}
+void b_press()
+{
+    button_b.onPressInput();
+}
+void y_press()
+{
+    button_y.onPressInput();
+}
+void a_press()
+{
+    button_a.onPressInput();
+}
+
+// hi
