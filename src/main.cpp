@@ -17,8 +17,6 @@ using std::string;
  *   ----------  REFERENCE  ---------
  *
  *   TODO:
- *      - untoggle inputs based on other inputs
- *      - firing code
  *      - pnuematics
  *      - print variables to screen
  *
@@ -100,13 +98,20 @@ public:
     bool rollerMotorReverse = false;
     bool enableIntakeMotor = false;
     bool intakeMotorReverse = false;
-    // Launcher
+    // Launcher Motor
     bool increaseLauncherSpeed = false;
     bool decreaseLauncherSpeed = false;
     float launcherSpeed_adjustPerSecond = 50;
     float launcherSpeed = 85;
     bool enableDiskLauncherMotor = false;
+    // fire disk stuff
+    float diskTimer = 0;
+    float pistonEnabledTime = 0.25;
+    float pistonRetractTime = 1;
+    float diskTimer_max = pistonEnabledTime + pistonRetractTime;
+    float launcherMotorMinSpeed = 0.9;
     bool launchDiskBool = false;
+
     // Endgame
     bool triggerEndgame = false;
 
@@ -120,6 +125,8 @@ public:
     void getUserInput();
     // Process axis for reasons
     int processAxis(int input, int cutoff);
+    // firing checklist for firing a disk
+    void firingProtocol();
     // applies input to drivechain motors
     void updateDriveMotors();
     // applies input to roller motor
@@ -283,13 +290,93 @@ void robot::updateUserControl()
 {
     Robot.getUserInput();
     Robot.updateDriveMotors();
-    Robot.updateLauncherMotor();
     Robot.updateIntakeMotor();
     Robot.updateRollerMotor();
+    Robot.updateLauncherMotor();
+    Robot.firingProtocol();
 
     if (/* condition */ false)
     {
         // do endgame
+    }
+}
+void robot::getUserInput()
+{
+    // Arrow Button Input
+    enableRollerMotor = button_up.pressed;
+    rollerMotorReverse = button_down.pressed;
+    increaseLauncherSpeed = button_left.pressed;
+    decreaseLauncherSpeed = button_right.pressed;
+    // Back Button Input
+    enableIntakeMotor = button_l2.pressed;
+    intakeMotorReverse = button_l1.pressed;
+    enableDiskLauncherMotor = button_r1.pressed;
+
+    // Letter Buttons
+    launchDiskBool = button_x.pressed;
+    triggerEndgame = button_a.pressed;
+
+    if (rollerMotorReverse && enableRollerMotor)
+    {
+        enableRollerMotor = false;
+        button_up.pressed = false;
+    }
+    if (intakeMotorReverse && enableIntakeMotor)
+    {
+        enableIntakeMotor = false;
+        button_l2.pressed = false;
+    }
+
+    // Axis Input
+    leftDrive = processAxis(Controller.Axis3.value(), 5);
+    rightDrive = processAxis(Controller.Axis2.value(), 5);
+
+    // check buttons
+    button_l1.isReleased();
+    button_l2.isReleased();
+    button_r1.isReleased();
+    button_r2.isReleased();
+    button_up.isReleased();
+    button_down.isReleased();
+    button_left.isReleased();
+    button_right.isReleased();
+    // button_x.isReleased();
+    // button_y.isReleased();
+    button_a.isReleased();
+    button_b.isReleased();
+}
+int robot::processAxis(int input, int cutoff)
+{
+    float result = input;
+    if (result <= cutoff && result >= -cutoff)
+        result = 0;
+    return result;
+}
+void robot::firingProtocol()
+{
+    // if diskTimer is at 0, proceed; else count down timer
+    if (diskTimer <= 0)
+    {
+        // if launcher motor is enabled AND the current velocity is X percent of set speed, proceed
+        if (enableDiskLauncherMotor && launcherMotor.velocity(percent) >= launcherMotorMinSpeed * (launcherSpeed / 600))
+        {
+            // if you actually want to fire disk, proceed
+            if (launchDiskBool)
+            {
+                // PNEUMATICS = TRUE
+                diskTimer = diskTimer_max;
+            }
+        }
+    }
+    else
+    {
+        diskTimer -= 1 * (20 / 1000);
+    }
+
+    // if timer is less than time needed to extend, retract
+    if (diskTimer <= diskTimer_max - pistonEnabledTime)
+    {
+        // PNEUMATICS = FALSE
     }
 }
 void robot::updateDriveMotors()
@@ -355,47 +442,6 @@ void robot::updateIntakeMotor()
         intakeMotor.setVelocity(0, percent);
     }
     intakeMotor.spin(fwd);
-}
-void robot::getUserInput()
-{
-    // Arrow Button Input
-    enableRollerMotor = button_up.pressed;
-    rollerMotorReverse = button_down.pressed;
-    increaseLauncherSpeed = button_left.pressed;
-    decreaseLauncherSpeed = button_right.pressed;
-    // Back Button Input
-    enableIntakeMotor = button_l2.pressed;
-    intakeMotorReverse = button_l1.pressed;
-    enableDiskLauncherMotor = button_r1.pressed;
-
-    // Letter Buttons
-    launchDiskBool = button_x.pressed;
-    triggerEndgame = button_a.pressed;
-
-    // Axis Input
-    leftDrive = processAxis(Controller.Axis3.value(), 5);
-    rightDrive = processAxis(Controller.Axis2.value(), 5);
-
-    // check buttons
-    button_l1.isReleased();
-    button_l2.isReleased();
-    button_r1.isReleased();
-    button_r2.isReleased();
-    button_up.isReleased();
-    button_down.isReleased();
-    button_left.isReleased();
-    button_right.isReleased();
-    // button_x.isReleased();
-    // button_y.isReleased();
-    button_a.isReleased();
-    button_b.isReleased();
-}
-int robot::processAxis(int input, int cutoff)
-{
-    float result = input;
-    if (result <= cutoff && result >= -cutoff)
-        result = 0;
-    return result;
 }
 
 /*
