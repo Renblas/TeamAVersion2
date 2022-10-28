@@ -36,6 +36,8 @@ motor launcherMotor = motor(PORT13, ratio36_1, false);
 motor endgameMotor = motor(PORT12, ratio6_1, false);
 
 // Pneumatics
+//digital_out launcherPneumatics = digital_out(Brain.ThreeWirePort.A);
+//launcherPneumatics.set(true);
 
 
 /*
@@ -147,10 +149,13 @@ robot Robot;
 // ENABLE TESTING MODE BOOL, SET TO FALSE WHEN AT COMPETITION
 // true = program calls either auto or manual at start
 // false = does nothing, waits for callbacks
-bool enableTesting = true;
+bool enableTesting = false;
 
 // is in competition
 bool inCompetition = true;
+
+// true = 3 sided auton; false = 2 sided auton
+bool auton3Position = true;
 
 // Every button has its own object and global function, global function is for callbacks
 
@@ -211,6 +216,13 @@ void pre_auton(void)
 
 void autonomous(void)
 {
+    if (auton3Position)
+    {
+        Robot.auto3Side();
+    } else {
+        Robot.auto2Side();
+    }
+    
 }
 
 void usercontrol(void)
@@ -219,7 +231,7 @@ void usercontrol(void)
     {
         Robot.updateUserControl();
 
-        wait(20, msec); // Sleep the task for a short amount of time to prevent wasted resources.
+        wait(20, msec);
     }
 }
 
@@ -331,7 +343,8 @@ void robot::firingProtocol()
     if (diskTimer <= 0)
     {
         // if launcher motor is enabled AND the current velocity is X percent of set speed, proceed
-        if (enableDiskLauncherMotor && launcherMotor.velocity(percent) >= launcherMotorMinSpeed * (launcherSpeed / 600))
+        if (enableDiskLauncherMotor &&
+             launcherMotor.velocity(percent) >= launcherMotorMinSpeed * (launcherSpeed / 600))
         {
             // if you actually want to fire disk, proceed
             if (launchDiskBool)
