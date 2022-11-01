@@ -29,7 +29,7 @@ motor_group rightMotorGroup = motor_group(frontRightMotor, backRightMotor);
 // Intake Motor
 motor intakeMotor = motor(PORT10, ratio18_1, false);
 // Roller Motor
-motor rollerMotor = motor(PORT11, ratio18_1, false);
+motor rollerMotor = motor(PORT7, ratio6_1, false);
 // Roller Motor
 motor launcherMotor = motor(PORT3, ratio36_1, true);
 // EndgameMotor
@@ -42,6 +42,18 @@ digital_out launcherPneumatics = digital_out(Brain.ThreeWirePort.A);
 /*
  *    ---- END VEXCODE CONFIGURED DEVICES ----
  */
+
+class customTimer {
+    public:
+        // variables
+        float time = 0;
+        float maxTime;
+        // functions
+        customTimer(float max);
+        void update();
+        void reset();
+        bool done();
+};
 
 //  Main Robot Class
 class robot
@@ -139,16 +151,6 @@ public:
     bool isReleased();
 };
 
-class customTimer {
-    public:
-        // variables
-        float time = 0;
-        float maxTime;
-        // functions
-        customTimer(float max);
-        void update();
-        bool done();
-}
 /*
  *   Global Variables
  */
@@ -242,7 +244,6 @@ void usercontrol(void)
     while (1)
     {
         Robot.getUserInput();
-        GlobalTimerArray.update();
         Robot.updateMotors();
 
         wait(20, msec);
@@ -363,7 +364,7 @@ int robot::processAxis(int input, int cutoff)
 void robot::firingProtocol()
 {
     // if diskTimer is at 0, proceed; else count down timer
-    if (diskTimer <= 0)
+    if (diskTimer.time <= 0)
     {
         // if launcher motor is enabled AND the current velocity is X percent of set speed, proceed
         if (enableDiskLauncherMotor &&
@@ -374,7 +375,7 @@ void robot::firingProtocol()
             {
                 launcherPneumatics.set(true);
                 disksLaunched += 1;
-                diskTimer = diskTimer_max;
+                diskTimer.reset();
             }
         }
     }
@@ -384,7 +385,7 @@ void robot::firingProtocol()
     }
 
     // if timer is less than time needed to extend, retract
-    if (diskTimer <= diskTimer_max - pistonEnabledTime)
+    if (diskTimer.time <= diskTimer.maxTime - pistonEnabledTime)
     {
         launcherPneumatics.set(false);
     }
@@ -504,7 +505,7 @@ void robot::auto3Side()
             if (!spinRoller_Timer.done())
             {
                 rollerMotor.setVelocity(100, rpm);
-                rollerMotor.spin();
+                rollerMotor.spin(fwd);
                 spinRoller_Timer.update();
                 continue;
             }
@@ -520,7 +521,7 @@ void robot::auto3Side()
         updateMotors();
 
 
-        wait(20, msec)
+        wait(20, msec);
     }
 }
 void robot::auto2Side()
@@ -537,7 +538,7 @@ customTimer::customTimer(float max) {
 void customTimer::update() {
     if (time > 0)
     {
-        time -= (20/1000)f;
+        time -= (20/1000);
     }
 }
 bool customTimer::done() {
@@ -548,6 +549,9 @@ bool customTimer::done() {
         return false;
     }
     
+}
+void customTimer::reset() {
+    time = maxTime;
 }
 
 
