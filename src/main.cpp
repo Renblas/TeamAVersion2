@@ -38,21 +38,21 @@ motor endgameMotor = motor(PORT4, ratio6_1, false);
 // Pneumatics
 digital_out launcherPneumatics = digital_out(Brain.ThreeWirePort.A);
 
-
 /*
  *    ---- END VEXCODE CONFIGURED DEVICES ----
  */
 
-class customTimer {
-    public:
-        // variables
-        float time = 0;
-        float maxTime;
-        // functions
-        customTimer(float max);
-        void update();
-        void reset();
-        bool done();
+class customTimer
+{
+public:
+    // variables
+    float time = 0;
+    float maxTime;
+    // functions
+    customTimer(float max);
+    void update();
+    void reset();
+    bool done();
 };
 
 //  Main Robot Class
@@ -117,11 +117,11 @@ public:
     // Trigger Endgame
     void updateEndgameLauncher();
     // screen not currently used
-    // void updateScreen();
+    void printScreenAt(string text, int x, int y);
     // update controller screen, not currently used
     // void updateControllerScreen();
 
-    // ----- Autonomous ----- 
+    // ----- Autonomous -----
     // assume start on 3-side; gets roller and launch 2 disk
     void auto3Side();
     // assume start on 2-side, perpendicular to roller; gets roller and launch 2 disk
@@ -233,10 +233,11 @@ void autonomous(void)
     if (auton3Position)
     {
         Robot.auto3Side();
-    } else {
+    }
+    else
+    {
         Robot.auto2Side();
     }
-    
 }
 
 void usercontrol(void)
@@ -283,10 +284,9 @@ int main()
 robot::robot()
 {
 }
-void robot::resetToDefault() 
+void robot::resetToDefault()
 {
     resetInputs();
-
 }
 void robot::resetInputs()
 {
@@ -368,7 +368,7 @@ void robot::firingProtocol()
     {
         // if launcher motor is enabled AND the current velocity is X percent of set speed, proceed
         if (enableDiskLauncherMotor &&
-             launcherMotor.velocity(percent) >= launcherMotorMinSpeed * (launcherSpeed / 600))
+            launcherMotor.velocity(percent) >= launcherMotorMinSpeed * (launcherSpeed / 600))
         {
             // if you actually want to fire disk, proceed
             if (launchDiskBool)
@@ -411,7 +411,7 @@ void robot::updateDriveMotors()
 }*/
 void robot::updateLauncherMotor()
 {
-    //adjustLauncherMotor();
+    // adjustLauncherMotor();
     if (enableDiskLauncherMotor)
     {
         launcherMotor.setVelocity(launcherSpeed, percent);
@@ -491,8 +491,8 @@ void robot::auto3Side()
             launchDiskBool = true;
             continue;
         }
-        
-        // second task: 
+
+        // second task:
         if (!spunRoller && !diskTimer.done())
         {
             if (!driveToRoller_Timer.done())
@@ -500,7 +500,7 @@ void robot::auto3Side()
                 leftDrive = 20;
                 rightDrive = 20;
                 driveToRoller_Timer.update();
-                continue;            
+                continue;
             }
             if (!spinRoller_Timer.done())
             {
@@ -516,44 +516,47 @@ void robot::auto3Side()
                 driveAtEnd_Timer.update();
             }
         }
-        
+
         // end of frame, apply to motors
         updateMotors();
-
 
         wait(20, msec);
     }
 }
 void robot::auto2Side()
 {
-    
 }
+void robot::
 
-/*
-*   Custom Timer class definitions
-*/
-customTimer::customTimer(float max) {
+    /*
+     *   Custom Timer class definitions
+     */
+    customTimer::customTimer(float max)
+{
     maxTime = max;
 }
-void customTimer::update() {
+void customTimer::update()
+{
     if (time > 0)
     {
-        time -= (20/1000);
+        time -= (20 / 1000);
     }
 }
-bool customTimer::done() {
+bool customTimer::done()
+{
     if (time <= 0)
     {
         return true;
-    } else {
+    }
+    else
+    {
         return false;
     }
-    
 }
-void customTimer::reset() {
+void customTimer::reset()
+{
     time = maxTime;
 }
-
 
 /*
  *   Button class definitions
