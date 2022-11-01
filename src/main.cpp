@@ -65,10 +65,9 @@ public:
     float launcherSpeed = 85;
     bool enableDiskLauncherMotor = false;
     // fire disk stuff
-    float diskTimer = 0;
     float pistonEnabledTime = 0.25;
     float pistonRetractTime = 1;
-    float diskTimer_max = pistonEnabledTime + pistonRetractTime;
+    customTimer diskTimer = customTimer(pistonEnabledTime + pistonRetractTime);
     float launcherMotorMinSpeed = 0.9;
     bool launchDiskBool = false;
     int disksLaunched = 0;
@@ -83,8 +82,10 @@ public:
     robot();
     // reset all variables to default
     void resetToDefault();
+    // reset control inputs to default
+    void resetInputs();
     // general function for all of user control stuff
-    void updateUserControl();
+    void updateMotors();
     // gets input from button objects / axis
     void getUserInput();
     // Process axis for reasons
@@ -138,6 +139,16 @@ public:
     bool isReleased();
 };
 
+class customTimer {
+    public:
+        // variables
+        float time = 0;
+        float maxTime;
+        // functions
+        customTimer(float max);
+        void update();
+        bool done();
+}
 /*
  *   Global Variables
  */
@@ -151,7 +162,8 @@ robot Robot;
 // false = does nothing, waits for callbacks
 bool enableTesting = true;
 
-// is in competition
+// is in competition, automatically checked; default is true
+// DO NOT CHANGE!!!!!!!!
 bool inCompetition = true;
 
 // true = 3 sided auton; false = 2 sided auton
@@ -229,7 +241,9 @@ void usercontrol(void)
 {
     while (1)
     {
-        Robot.updateUserControl();
+        Robot.getUserInput();
+        GlobalTimerArray.update();
+        Robot.updateMotors();
 
         wait(20, msec);
     }
@@ -246,8 +260,6 @@ int main()
 
     // Run the pre-autonomous function.
     pre_auton();
-
-    launcherPneumatics.set(true);
 
     // call manual if debug and testing
     if (enableTesting && !inCompetition)
@@ -270,18 +282,36 @@ int main()
 robot::robot()
 {
 }
-void robot::resetToDefault() {
+void robot::resetToDefault() 
+{
+    resetInputs();
 
 }
-void robot::updateUserControl()
+void robot::resetInputs()
 {
-    Robot.getUserInput();
-    Robot.updateDriveMotors();
-    Robot.updateIntakeMotor();
-    Robot.updateRollerMotor();
-    Robot.updateLauncherMotor();
-    Robot.firingProtocol();
-    Robot.updateEndgameLauncher();
+    leftDrive = 0;
+    rightDrive = 0;
+
+    enableDiskLauncherMotor = false;
+    launchDiskBool = false;
+
+    enableIntakeMotor = false;
+    intakeMotorReverse = false;
+
+    enableRollerMotor = false;
+    rollerMotorReverse = false;
+
+    enableEndgame = false;
+    enableEndgameReverse = false;
+}
+void robot::updateMotors()
+{
+    updateDriveMotors();
+    updateIntakeMotor();
+    updateRollerMotor();
+    updateLauncherMotor();
+    firingProtocol();
+    updateEndgameLauncher();
 }
 void robot::getUserInput()
 {
@@ -342,7 +372,7 @@ void robot::firingProtocol()
             // if you actually want to fire disk, proceed
             if (launchDiskBool)
             {
-                // PNEUMATICS = TRUE
+                launcherPneumatics.set(true);
                 disksLaunched += 1;
                 diskTimer = diskTimer_max;
             }
@@ -350,13 +380,13 @@ void robot::firingProtocol()
     }
     else
     {
-        diskTimer -= 1 * (20 / 1000);
+        diskTimer.update();
     }
 
     // if timer is less than time needed to extend, retract
     if (diskTimer <= diskTimer_max - pistonEnabledTime)
     {
-        // PNEUMATICS = FALSE
+        launcherPneumatics.set(false);
     }
 }
 void robot::updateDriveMotors()
@@ -441,10 +471,82 @@ void robot::updateEndgameLauncher()
 }
 void robot::auto3Side()
 {
+    bool spunRoller = false;
 
+    customTimer driveToRoller_Timer = customTimer(0.25);
+    customTimer spinRoller_Timer = customTimer(0.48); // Theoretical time to spin roller; see README
+    customTimer driveAtEnd_Timer = customTimer(0.5);
+
+    while (true)
+    {
+        // on frame start, reset inputs
+        resetInputs();
+
+        // first task: fire two disks
+        if (disksLaunched < 2)
+        {
+            launcherSpeed = 100;
+            enableDiskLauncherMotor = true;
+            launchDiskBool = true;
+            continue;
+        }
+        
+        // second task: 
+        if (!spunRoller && !diskTimer.done())
+        {
+            if (!driveToRoller_Timer.done())
+            {
+                leftDrive = 20;
+                rightDrive = 20;
+                driveToRoller_Timer.update();
+                continue;            
+            }
+            if (!spinRoller_Timer.done())
+            {
+                rollerMotor.setVelocity(100, rpm);
+                rollerMotor.spin();
+                spinRoller_Timer.update();
+                continue;
+            }
+            if (!driveAtEnd_Timer.done())
+            {
+                leftDrive = -20;
+                rightDrive = -20;
+                driveAtEnd_Timer.update();
+            }
+        }
+        
+        // end of frame, apply to motors
+        updateMotors();
+
+
+        wait(20, msec)
+    }
 }
 void robot::auto2Side()
 {
+    
+}
+
+/*
+*   Custom Timer class definitions
+*/
+customTimer::customTimer(float max) {
+    maxTime = max;
+}
+void customTimer::update() {
+    if (time > 0)
+    {
+        time -= (20/1000)f;
+    }
+}
+bool customTimer::done() {
+    if (time <= 0)
+    {
+        return true;
+    } else {
+        return false;
+    }
     
 }
 
