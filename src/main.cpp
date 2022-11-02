@@ -29,7 +29,7 @@ motor_group rightMotorGroup = motor_group(frontRightMotor, backRightMotor);
 // Intake Motor
 motor intakeMotor = motor(PORT10, ratio18_1, false);
 // Roller Motor
-motor rollerMotor = motor(PORT7, ratio6_1, false);
+motor rollerMotor = motor(PORT7, ratio6_1, true);
 // Roller Motor
 motor launcherMotor = motor(PORT3, ratio36_1, true);
 // EndgameMotor
@@ -74,7 +74,8 @@ public:
     bool increaseLauncherSpeed = false;
     bool decreaseLauncherSpeed = false;
     float launcherSpeed_adjustPerSecond = 50;
-    float launcherSpeed = 85;
+    float launcherSpeed_default = 70;
+    float launcherSpeed = launcherSpeed_default;
     bool enableDiskLauncherMotor = false;
     // fire disk stuff
     float pistonEnabledTime = 0.25;
@@ -188,9 +189,9 @@ customButton button_l1 = customButton(false, "l1");
 void l2_press();
 customButton button_l2 = customButton(true, "l2");
 void r1_press();
-customButton button_r1 = customButton(true, "r1");
+customButton button_r1 = customButton(false, "r1");
 void r2_press();
-customButton button_r2 = customButton(false, "r2");
+customButton button_r2 = customButton(true, "r2");
 // Arrow buttons
 void up_press();
 customButton button_up = customButton(false, "up");
@@ -302,6 +303,7 @@ robot::robot()
 void robot::resetToDefault()
 {
     resetInputs();
+    launcherSpeed = launcherSpeed_default;
 }
 void robot::resetInputs()
 {
@@ -332,13 +334,13 @@ void robot::updateMotors()
 void robot::getUserInput()
 {
     // Arrow Button Input
-    enableRollerMotor = button_r2.pressed;
+    enableRollerMotor = button_r1.pressed;
     //increaseLauncherSpeed = button_left.pressed;
     //decreaseLauncherSpeed = button_right.pressed;
     // Back Button Input
     enableIntakeMotor = button_l2.pressed;
     intakeMotorReverse = button_l1.pressed;
-    enableDiskLauncherMotor = button_r1.pressed;
+    enableDiskLauncherMotor = button_r2.pressed;
 
     // Letter Buttons
     launchDiskBool = button_y.pressed;
