@@ -220,15 +220,15 @@ void pre_auton(void)
     Controller.ButtonL1.pressed(l1_press);
     Controller.ButtonL2.pressed(l2_press);
     Controller.ButtonR1.pressed(r1_press);
-    // Controller.ButtonR2.pressed(r2_press);
+    Controller.ButtonR2.pressed(r2_press);
     Controller.ButtonUp.pressed(up_press);
     Controller.ButtonDown.pressed(down_press);
-    Controller.ButtonLeft.pressed(left_press);
-    Controller.ButtonRight.pressed(right_press);
-    Controller.ButtonX.pressed(x_press);
-    // Controller.ButtonB.pressed(b_press);
-    // Controller.ButtonY.pressed(y_press);
-    Controller.ButtonA.pressed(a_press);
+    //Controller.ButtonLeft.pressed(left_press);
+    //Controller.ButtonRight.pressed(right_press);
+    //Controller.ButtonX.pressed(x_press);
+    //Controller.ButtonB.pressed(b_press);
+    Controller.ButtonY.pressed(y_press);
+    //Controller.ButtonA.pressed(a_press);
 
     // is in competition
     if (!Competition.isCompetitionSwitch() && !Competition.isFieldControl())
@@ -333,15 +333,15 @@ void robot::getUserInput()
 {
     // Arrow Button Input
     enableRollerMotor = button_r2.pressed;
-    increaseLauncherSpeed = button_left.pressed;
-    decreaseLauncherSpeed = button_right.pressed;
+    //increaseLauncherSpeed = button_left.pressed;
+    //decreaseLauncherSpeed = button_right.pressed;
     // Back Button Input
     enableIntakeMotor = button_l2.pressed;
     intakeMotorReverse = button_l1.pressed;
     enableDiskLauncherMotor = button_r1.pressed;
 
     // Letter Buttons
-    launchDiskBool = button_x.pressed;
+    launchDiskBool = button_y.pressed;
     enableEndgame = button_up.pressed;
     enableEndgameReverse = button_down.pressed;
 
@@ -362,12 +362,12 @@ void robot::getUserInput()
     button_r2.checkRelease();
     button_up.checkRelease();
     button_down.checkRelease();
-    button_left.checkRelease();
-    button_right.checkRelease();
-    // button_x.checkRelease();
-    // button_y.checkRelease();
-    button_a.checkRelease();
-    button_b.checkRelease();
+    //button_left.checkRelease();
+    //button_right.checkRelease();
+    //button_x.checkRelease();
+    button_y.checkRelease();
+    //button_a.checkRelease();
+    //button_b.checkRelease();
 }
 int robot::processAxis(int input, int cutoff)
 {
@@ -394,13 +394,10 @@ void robot::firingProtocol()
             }
         }
     }
-    else
-    {
-        diskTimer.update();
-    }
+    diskTimer.update();
 
     // if timer is less than time needed to extend, retract
-    if (diskTimer.time <= diskTimer.maxTime - pistonEnabledTime)
+    if (diskTimer.time <= (diskTimer.maxTime - pistonEnabledTime))
     {
         launcherPneumatics.set(false);
     }
@@ -548,7 +545,16 @@ void robot::updateScreen()
     {
         printScreenAt("testing enabled... " + boolToString(enableTesting), 1, 1);
         printScreenAt("running... " + currentTask, 1, 2);
-        printScreenAt("who is da best? " + (string) "LORD CALEB", 1, 3);
+        
+        Brain.Screen.clearLine(3);
+        Brain.Screen.setCursor(3, 1);
+        Brain.Screen.print(diskTimer.time);
+
+        Brain.Screen.clearLine(4);
+        Brain.Screen.setCursor(4, 1);
+        Brain.Screen.print(diskTimer.maxTime - pistonEnabledTime);
+
+        screenTimer.reset();
     }
 }
 void robot::printScreenAt(string text, int x, int y)
@@ -569,7 +575,7 @@ void customTimer::update()
 {
     if (time > 0)
     {
-        time -= (20 / 1000);
+        time -= ((float)20 / (float)1000);
     }
 }
 bool customTimer::done()
