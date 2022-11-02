@@ -35,8 +35,8 @@ motor launcherMotor = motor(PORT3, ratio36_1, true);
 // EndgameMotor
 motor endgameMotor = motor(PORT4, ratio6_1, false);
 
-// Pneumatics
-digital_out launcherPneumatics = digital_out(Brain.ThreeWirePort.A);
+triport ThreeWirePort = vex::triport(vex::PORT22);
+digital_out launcherPneumatics = digital_out(ThreeWirePort.A);
 
 /*
  *    ---- END VEXCODE CONFIGURED DEVICES ----
@@ -83,10 +83,13 @@ public:
     float launcherMotorMinSpeed = 0.9;
     bool launchDiskBool = false;
     int disksLaunched = 0;
-
     // Endgame
     bool enableEndgame = false;
     bool enableEndgameReverse = false;
+    // Screen
+    bool enableImage = false;
+    float screenRefreshRate = 1 / 30;
+    customTimer screenTimer = customTimer(screenRefreshRate);
 
     // ----- Functions -----
 
@@ -117,6 +120,8 @@ public:
     // Trigger Endgame
     void updateEndgameLauncher();
     // screen not currently used
+    void updateScreen();
+    // prints string to screen at position, clears line beforehand
     void printScreenAt(string text, int x, int y);
     // update controller screen, not currently used
     // void updateControllerScreen();
@@ -151,6 +156,9 @@ public:
     bool isReleased();
 };
 
+// declared functions
+string boolToString(bool input);
+
 /*
  *   Global Variables
  */
@@ -171,6 +179,7 @@ bool inCompetition = true;
 // true = 3 sided auton; false = 2 sided auton
 bool auton3Position = true;
 
+string currentTask;
 // Every button has its own object and global function, global function is for callbacks
 
 // Back Buttons
@@ -232,20 +241,24 @@ void autonomous(void)
 {
     if (auton3Position)
     {
+        currentTask = "AUTONOMOUS_3_SIDE";
         Robot.auto3Side();
     }
     else
     {
+        currentTask = "AUTONOMOUS_2_SIDE";
         Robot.auto2Side();
     }
 }
 
 void usercontrol(void)
 {
+    currentTask = "USER_CONTROL";
     while (1)
     {
         Robot.getUserInput();
         Robot.updateMotors();
+        Robot.updateScreen();
 
         wait(20, msec);
     }
@@ -262,6 +275,8 @@ int main()
 
     // Run the pre-autonomous function.
     pre_auton();
+
+    Robot.printScreenAt("testing enabled... " + boolToString(enableTesting), 1, 1);
 
     // call manual if debug and testing
     if (enableTesting && !inCompetition)
@@ -526,12 +541,27 @@ void robot::auto3Side()
 void robot::auto2Side()
 {
 }
-void robot::
+void robot::updateScreen()
+{
+    screenTimer.update();
+    if (screenTimer.done())
+    {
+        printScreenAt("testing enabled... " + boolToString(enableTesting), 1, 1);
+        printScreenAt("running... " + currentTask, 1, 2);
+        printScreenAt("who is da best? " + (string) "LORD CALEB", 1, 3);
+    }
+}
+void robot::printScreenAt(string text, int x, int y)
+{
+    Brain.Screen.clearLine(y);
+    Brain.Screen.setCursor(y, x);
+    Brain.Screen.print(text.c_str());
+}
 
-    /*
-     *   Custom Timer class definitions
-     */
-    customTimer::customTimer(float max)
+/*
+ *   Custom Timer class definitions
+ */
+customTimer::customTimer(float max)
 {
     maxTime = max;
 }
@@ -555,7 +585,7 @@ bool customTimer::done()
 }
 void customTimer::reset()
 {
-    time = maxTime;
+    time += maxTime;
 }
 
 /*
@@ -672,6 +702,22 @@ void y_press()
 void a_press()
 {
     button_a.onPressInput();
+}
+
+// Util Functions
+
+string boolToString(bool input)
+{
+    string a;
+    if (input)
+    {
+        a = "TRUE";
+    }
+    else
+    {
+        a = "FALSE";
+    }
+    return a;
 }
 
 // hi
