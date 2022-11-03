@@ -504,25 +504,22 @@ void robot::auto3Side()
             launcherSpeed = 100;
             enableDiskLauncherMotor = true;
             launchDiskBool = true;
-            continue;
         }
 
         // second task:
-        if (!spunRoller && !diskTimer.done())
+        else if (!spunRoller && !diskTimer.done())
         {
             if (!driveToRoller_Timer.done())
             {
                 leftDrive = 20;
                 rightDrive = 20;
                 driveToRoller_Timer.update();
-                continue;
             }
             if (!spinRoller_Timer.done())
             {
                 rollerMotor.setVelocity(100, rpm);
                 rollerMotor.spin(fwd);
                 spinRoller_Timer.update();
-                continue;
             }
             if (!driveAtEnd_Timer.done())
             {
