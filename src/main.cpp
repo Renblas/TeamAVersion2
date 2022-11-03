@@ -171,7 +171,7 @@ robot Robot;
 // ENABLE TESTING MODE BOOL, SET TO FALSE WHEN AT COMPETITION
 // true = program calls either auto or manual at start
 // false = does nothing, waits for callbacks
-bool enableTesting = true;
+bool enableTesting = false;
 
 // is in competition, automatically checked; default is true
 // DO NOT CHANGE!!!!!!!!
@@ -533,6 +533,7 @@ void robot::auto3Side()
 
         // end of frame, apply to motors
         updateMotors();
+        updateScreen();
 
         wait(20, msec);
     }
