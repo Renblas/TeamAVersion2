@@ -243,7 +243,7 @@ void autonomous(void)
     if (auton3Position)
     {
         currentTask = "AUTONOMOUS_3_SIDE";
-        Robot.updateScreen();
+        //Robot.updateScreen();
         Robot.auto3Side();
     }
     else
