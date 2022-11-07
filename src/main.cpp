@@ -386,7 +386,7 @@ void robot::firingProtocol()
     {
         // if launcher motor is enabled AND the current velocity is X percent of set speed, proceed
         if (enableDiskLauncherMotor &&
-            launcherMotor.velocity(rpm) >= launcherMotorMinSpeed * (launcherSpeed / 600))
+            launcherMotor.velocity(rpm) >= launcherMotorMinSpeed * ((launcherSpeed / (float)100) * (float)600))
         {
             // if you actually want to fire disk, proceed
             if (launchDiskBool)
