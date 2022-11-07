@@ -47,7 +47,7 @@ class customTimer
 public:
     // variables
     float time = 0;
-    float maxTime;
+    float maxTime = 0;
     // functions
     customTimer(float max);
     void update();
@@ -382,7 +382,7 @@ int robot::processAxis(int input, int cutoff)
 void robot::firingProtocol()
 {
     // if diskTimer is at 0, proceed; else count down timer
-    if (diskTimer.time <= 0)
+    if (diskTimer.done())
     {
         // if launcher motor is enabled AND the current velocity is X percent of set speed, proceed
         if (enableDiskLauncherMotor &&
@@ -511,7 +511,7 @@ void robot::auto3Side()
         }
 
         // second task:
-        else if (!spunRoller && !diskTimer.done())
+        /*else if (!spunRoller && !diskTimer.done())
         {
             if (!driveToRoller_Timer.done())
             {
@@ -531,7 +531,7 @@ void robot::auto3Side()
                 rightDrive = -20;
                 driveAtEnd_Timer.update();
             }
-        }
+        }*/
 
         // end of frame, apply to motors
         updateMotors();
@@ -575,6 +575,7 @@ void robot::printScreenAt(string text, int x, int y)
 customTimer::customTimer(float max)
 {
     maxTime = max;
+    time += maxTime;
 }
 void customTimer::update()
 {
