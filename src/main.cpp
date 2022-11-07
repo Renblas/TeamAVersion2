@@ -384,13 +384,16 @@ void robot::firingProtocol()
     // if diskTimer is at 0, proceed; else count down timer
     if (diskTimer.done())
     {
+        printScreenAt("timer done", 1, 5);
         // if launcher motor is enabled AND the current velocity is X percent of set speed, proceed
         if (enableDiskLauncherMotor &&
-            launcherMotor.velocity(rpm) >= launcherMotorMinSpeed * ((launcherSpeed / (float)100) * (float)600))
+            launcherMotor.velocity(percent) >= launcherMotorMinSpeed * launcherSpeed)
         {
+            printScreenAt("Launcher Good", 1, 6);
             // if you actually want to fire disk, proceed
             if (launchDiskBool)
             {
+                printScreenAt("FIRE ZE FLAMMENWERFER", 1, 7);
                 launcherPneumatics.set(true);
                 disksLaunched += 1;
                 diskTimer.reset();
@@ -489,8 +492,8 @@ void robot::auto3Side()
 {
     bool spunRoller = false;
 
-    customTimer driveToRoller_Timer = customTimer(0.25);
-    customTimer spinRoller_Timer = customTimer(0.48); // Theoretical time to spin roller; see README
+    customTimer driveToRoller_Timer = customTimer(0.5);
+    customTimer spinRoller_Timer = customTimer(1); // Theoretical time to spin roller; see README 0.48
     customTimer driveAtEnd_Timer = customTimer(0.5);
 
     while (true)
@@ -504,19 +507,19 @@ void robot::auto3Side()
             launcherSpeed = 100;
             enableDiskLauncherMotor = true;
             launchDiskBool = true;
-            if (disksLaunched > 1)
+            if (disksLaunched >= 1)
             {
                 enableIntakeMotor = true;
             }
         }
 
         // second task:
-        /*else if (!spunRoller && !diskTimer.done())
+        else if (!spunRoller && !diskTimer.done())
         {
             if (!driveToRoller_Timer.done())
             {
-                leftDrive = 20;
-                rightDrive = 20;
+                leftDrive = 40;
+                rightDrive = 40;
                 driveToRoller_Timer.update();
             }
             else if (!spinRoller_Timer.done())
@@ -527,11 +530,11 @@ void robot::auto3Side()
             }
             else if (!driveAtEnd_Timer.done())
             {
-                leftDrive = -20;
-                rightDrive = -20;
+                leftDrive = -10;
+                rightDrive = -10;
                 driveAtEnd_Timer.update();
             }
-        }*/
+        }
 
         // end of frame, apply to motors
         updateMotors();
