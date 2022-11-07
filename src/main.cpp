@@ -178,7 +178,7 @@ bool enableTesting = false;
 bool inCompetition = true;
 
 // true = 3 sided auton; false = 2 sided auton
-bool auton3Position = true;
+bool auton3Position = false;
 
 string currentTask;
 // Every button has its own object and global function, global function is for callbacks
@@ -545,6 +545,16 @@ void robot::auto3Side()
 }
 void robot::auto2Side()
 {
+    while (true)
+    {
+        leftDrive = 20;
+        rightDrive = -20;
+
+        updateMotors();
+
+        wait(20, msec);
+    }
+    
 }
 void robot::updateScreen()
 {
