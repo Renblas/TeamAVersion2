@@ -55,6 +55,19 @@ public:
     bool done();
 };
 
+class gyroRotation 
+{
+    public:
+        float inTurn = false;
+        float startRotation = 0;
+        float endRotation = 0;
+        bool finished = false;
+
+        void update();
+        void start(float endRotation_f);
+        void isFinished();
+};
+
 //  Main Robot Class
 class robot
 {
@@ -675,6 +688,27 @@ void customButton::onPressInput()
     else
     {
         pressed = rawPressed;
+    }
+}
+
+// gyroRotation class definitions
+
+void gyroRotation::start(endRotation_f) {
+    startRotation = GyroA.value(degrees);
+    endRotation = endRotation_f;
+}
+void gyroRotation::update() {
+    if(!isFinished()) {
+
+    } else {
+
+    }
+}
+bool gyroRotation::isFinished() {
+    if(GyroA.value(degrees) - startRotation >= endRotation) {
+        return true;
+    } else {
+        return false;
     }
 }
 
