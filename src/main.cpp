@@ -37,6 +37,7 @@ motor endgameMotor = motor(PORT4, ratio6_1, false);
 
 triport ThreeWirePort = vex::triport(vex::PORT22);
 digital_out launcherPneumatics = digital_out(ThreeWirePort.A);
+gyro GyroA = gyro(ThreeWirePort.B);
 
 /*
  *    ---- END VEXCODE CONFIGURED DEVICES ----
@@ -63,9 +64,9 @@ class gyroRotation
         float endRotation = 0;
         bool finished = false;
 
+        gyroRotation(float endRotation_f);
         void update();
-        void start(float endRotation_f);
-        void isFinished();
+        bool isFinished();
 };
 
 //  Main Robot Class
@@ -75,8 +76,9 @@ public:
     // ----- Variables -----
 
     // Drivetrain
-    int leftDrive = 0;
-    int rightDrive = 0;
+    float leftDrive = 0;
+    float rightDrive = 0;
+    float gyroRotateSpeed = 20;
     // bool straightDrive = false;
     //  Roller & Intake
     bool enableRollerMotor = false;
@@ -368,8 +370,8 @@ void robot::getUserInput()
     }
 
     // Axis Input
-    leftDrive = processAxis(Controller.Axis3.value(), 5);
-    rightDrive = processAxis(Controller.Axis2.value(), 5);
+    leftDrive = processAxis(Controller.Axis3.position(), 5);
+    rightDrive = processAxis(Controller.Axis2.position(), 5);
 
     // check buttons
     button_l1.checkRelease();
@@ -515,7 +517,7 @@ void robot::auto3Side()
         resetInputs();
 
         // first task: fire two disks
-        if (disksLaunched < 2)
+        /*if (disksLaunched < 2)
         {
             launcherSpeed = 100;
             enableDiskLauncherMotor = true;
@@ -524,10 +526,10 @@ void robot::auto3Side()
             {
                 enableIntakeMotor = true;
             }
-        }
+        }*/
 
         // second task:
-        else if (!spunRoller && !diskTimer.done())
+        /*else*/ if (!spunRoller && !diskTimer.done())
         {
             if (!driveToRoller_Timer.done())
             {
@@ -558,10 +560,16 @@ void robot::auto3Side()
 }
 void robot::auto2Side()
 {
+    gyroRotation turn90 = gyroRotation(90);
+
     while (true)
     {
-        leftDrive = 20;
-        rightDrive = -20;
+        if (!turn90.isFinished())
+        {
+            turn90.update();
+        }
+        
+        
 
         updateMotors();
 
@@ -693,13 +701,15 @@ void customButton::onPressInput()
 
 // gyroRotation class definitions
 
-void gyroRotation::start(endRotation_f) {
+
+gyroRotation::gyroRotation(float endRotation_f) {
     startRotation = GyroA.value(degrees);
     endRotation = endRotation_f;
 }
 void gyroRotation::update() {
     if(!isFinished()) {
-
+        Robot.leftDrive = Robot.gyroRotateSpeed;
+        Robot.rightDrive = -Robot.gyroRotateSpeed;
     } else {
 
     }
