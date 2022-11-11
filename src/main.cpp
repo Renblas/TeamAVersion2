@@ -83,6 +83,8 @@ public:
     //  Roller & Intake
     bool enableRollerMotor = false;
     bool rollerMotorReverse = false;
+    float defaultRollerMotorVelocity = 100;
+    float rollerMotorVelocity = defaultRollerMotorVelocity;
     bool enableIntakeMotor = false;
     bool intakeMotorReverse = false;
     // Launcher Motor
@@ -320,6 +322,7 @@ void robot::resetToDefault()
 {
     resetInputs();
     launcherSpeed = launcherSpeed_default;
+    rollerMotorVelocity = defaultRollerMotorVelocity;
 }
 void robot::resetInputs()
 {
@@ -508,7 +511,7 @@ void robot::auto3Side()
     bool spunRoller = false;
 
     customTimer driveToRoller_Timer = customTimer(0.5);
-    customTimer spinRoller_Timer = customTimer(1); // Theoretical time to spin roller; see README 0.48
+    customTimer spinRoller_Timer = customTimer(10); // Theoretical time to spin roller; see README 0.48
     customTimer driveAtEnd_Timer = customTimer(0.5);
 
     while (true)
@@ -533,14 +536,14 @@ void robot::auto3Side()
         {
             if (!driveToRoller_Timer.done())
             {
-                leftDrive = 40;
-                rightDrive = 40;
+                leftDrive = 20;
+                rightDrive = 20;
                 driveToRoller_Timer.update();
             }
             else if (!spinRoller_Timer.done())
             {
-                rollerMotor.setVelocity(100, rpm);
-                rollerMotor.spin(fwd);
+                enableRollerMotor = true;
+                rollerMotorVelocity = 100;
                 spinRoller_Timer.update();
             }
             else if (!driveAtEnd_Timer.done())
@@ -560,14 +563,15 @@ void robot::auto3Side()
 }
 void robot::auto2Side()
 {
-    gyroRotation turn90 = gyroRotation(90);
-
     while (true)
     {
-        if (!turn90.isFinished())
+
+        leftDrive = -10;
+        rightDrive = 20;
+        /*if (!turn90.isFinished())
         {
             turn90.update();
-        }
+        }*/
         
         
 
