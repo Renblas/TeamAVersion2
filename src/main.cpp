@@ -29,7 +29,7 @@ motor_group rightMotorGroup = motor_group(frontRightMotor, backRightMotor);
 // Intake Motor
 motor intakeMotor = motor(PORT10, ratio18_1, false);
 // Roller Motor
-motor rollerMotor = motor(PORT7, ratio6_1, true);
+motor rollerMotor = motor(PORT7, ratio6_1, false);
 // Roller Motor
 motor launcherMotor = motor(PORT3, ratio36_1, true);
 // EndgameMotor
@@ -237,16 +237,16 @@ void pre_auton(void)
     // set keyboard callbacks
     Controller.ButtonL1.pressed(l1_press);
     Controller.ButtonL2.pressed(l2_press);
-    Controller.ButtonR1.pressed(r1_press);
+    //Controller.ButtonR1.pressed(r1_press);
     Controller.ButtonR2.pressed(r2_press);
     Controller.ButtonUp.pressed(up_press);
     Controller.ButtonDown.pressed(down_press);
     //Controller.ButtonLeft.pressed(left_press);
     //Controller.ButtonRight.pressed(right_press);
     //Controller.ButtonX.pressed(x_press);
-    //Controller.ButtonB.pressed(b_press);
+    Controller.ButtonB.pressed(b_press);
     Controller.ButtonY.pressed(y_press);
-    //Controller.ButtonA.pressed(a_press);
+    Controller.ButtonA.pressed(a_press);
 
     // is in competition
     if (!Competition.isCompetitionSwitch() && !Competition.isFieldControl())
@@ -353,7 +353,8 @@ void robot::updateMotors()
 void robot::getUserInput()
 {
     // Arrow Button Input
-    enableRollerMotor = button_r1.pressed;
+    enableRollerMotor = button_a.pressed;
+    rollerMotorReverse = button_b.pressed;
     //increaseLauncherSpeed = button_left.pressed;
     //decreaseLauncherSpeed = button_right.pressed;
     // Back Button Input
@@ -387,8 +388,8 @@ void robot::getUserInput()
     //button_right.checkRelease();
     //button_x.checkRelease();
     button_y.checkRelease();
-    //button_a.checkRelease();
-    //button_b.checkRelease();
+    button_a.checkRelease();
+    button_b.checkRelease();
 }
 int robot::processAxis(int input, int cutoff)
 {
@@ -511,7 +512,7 @@ void robot::auto3Side()
     bool spunRoller = false;
 
     customTimer driveToRoller_Timer = customTimer(0.5);
-    customTimer spinRoller_Timer = customTimer(10); // Theoretical time to spin roller; see README 0.48
+    customTimer spinRoller_Timer = customTimer(5); // Theoretical time to spin roller; see README 0.48
     customTimer driveAtEnd_Timer = customTimer(0.5);
 
     while (true)
@@ -545,6 +546,7 @@ void robot::auto3Side()
                 enableRollerMotor = true;
                 rollerMotorVelocity = 100;
                 spinRoller_Timer.update();
+                if (spinRoller_Timer.done()) spunRoller = true;
             }
             else if (!driveAtEnd_Timer.done())
             {
@@ -563,17 +565,52 @@ void robot::auto3Side()
 }
 void robot::auto2Side()
 {
+    bool spunRoller = false;
+
+    customTimer driveToTurn_Timer = customTimer(1.75);
+    customTimer turn90_Timer = customTimer(1.15); // time to turn 90 degrees, based off of 5.2 sec full rotation
+    customTimer driveToRoller_Timer = customTimer(2);
+    customTimer spinRoller_Timer = customTimer(2); // Theoretical time to spin roller; see README 0.48
+    customTimer driveAtEnd_Timer = customTimer(0.5);
+
     while (true)
     {
-
-        leftDrive = -10;
-        rightDrive = 20;
-        /*if (!turn90.isFinished())
+        resetInputs();
+        
+        if (!spunRoller)
         {
-            turn90.update();
-        }*/
-        
-        
+            if (!driveToTurn_Timer.done())
+            {
+                leftDrive = 20;
+                rightDrive = 20;
+                driveToTurn_Timer.update();
+            }
+            else if (!turn90_Timer.done())
+            {
+                leftDrive = 20;
+                rightDrive = -10;
+                turn90_Timer.update();
+            }
+            else if (!driveToRoller_Timer.done())
+            {
+                leftDrive = 20;
+                rightDrive = 20;
+                driveToRoller_Timer.update();
+            }
+            else if (!spinRoller_Timer.done())
+            {
+                enableRollerMotor = true;
+                rollerMotorVelocity = 100;
+                spinRoller_Timer.update();
+                if (spinRoller_Timer.done()) spunRoller = true;
+            }
+            else if (!driveAtEnd_Timer.done())
+            {
+                leftDrive = -10;
+                rightDrive = -10;
+                driveAtEnd_Timer.update();
+            }
+        }
 
         updateMotors();
 
