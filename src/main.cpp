@@ -83,7 +83,7 @@ public:
     //  Roller & Intake
     bool enableRollerMotor = false;
     bool rollerMotorReverse = false;
-    float defaultRollerMotorVelocity = 100;
+    float defaultRollerMotorVelocity = 50;
     float rollerMotorVelocity = defaultRollerMotorVelocity;
     bool enableIntakeMotor = false;
     bool intakeMotorReverse = false;
@@ -272,7 +272,9 @@ void autonomous(void)
 
 void usercontrol(void)
 {
+    Robot.resetToDefault();
     currentTask = "USER_CONTROL";
+
     while (1)
     {
         Robot.getUserInput();
@@ -463,11 +465,11 @@ void robot::updateRollerMotor()
 {
     if (enableRollerMotor)
     {
-        rollerMotor.setVelocity(100, percent);
+        rollerMotor.setVelocity(rollerMotorVelocity, percent);
     }
     else if (rollerMotorReverse)
     {
-        rollerMotor.setVelocity(-100, percent);
+        rollerMotor.setVelocity(-rollerMotorVelocity, percent);
     }
     else
     {
@@ -569,9 +571,10 @@ void robot::auto2Side()
 
     customTimer driveToTurn_Timer = customTimer(1.75);
     customTimer turn90_Timer = customTimer(1.15); // time to turn 90 degrees, based off of 5.2 sec full rotation
-    customTimer driveToRoller_Timer = customTimer(2);
-    customTimer spinRoller_Timer = customTimer(2); // Theoretical time to spin roller; see README 0.48
+    customTimer driveToRoller_Timer = customTimer(1);
+    customTimer spinRoller_Timer = customTimer(0.5); // Theoretical time to spin roller; see README 0.48
     customTimer driveAtEnd_Timer = customTimer(0.5);
+    customTimer testTimer = customTimer(1);
 
     while (true)
     {
@@ -597,10 +600,22 @@ void robot::auto2Side()
                 rightDrive = 20;
                 driveToRoller_Timer.update();
             }
-            else if (!spinRoller_Timer.done())
+            else if (!testTimer.done())
+            {
+                leftDrive = -10;
+                rightDrive = -10;
+                rollerMotorVelocity = 50;
+                enableRollerMotor = true;
+                testTimer.update();
+            }
+            
+            
+            /*else if (!spinRoller_Timer.done())
             {
                 enableRollerMotor = true;
-                rollerMotorVelocity = 100;
+                rollerMotorVelocity = 50;
+                leftDrive = 7.5;
+                rightDrive = 7.5;
                 spinRoller_Timer.update();
                 if (spinRoller_Timer.done()) spunRoller = true;
             }
@@ -609,7 +624,7 @@ void robot::auto2Side()
                 leftDrive = -10;
                 rightDrive = -10;
                 driveAtEnd_Timer.update();
-            }
+            }*/
         }
 
         updateMotors();
