@@ -1,4 +1,7 @@
 #include <string>
+#include "vexDevices.h"
+
+using std::string;
 
 // custom button class
 
@@ -45,7 +48,7 @@ customButton button_a = customButton(false, "a", Controller);
  *   Button class definitions
  */
 
-customButton::customButton(bool toggle, string buttonName_f, controller Controller_f, robot Robot_f)
+customButton::customButton(bool toggle, string buttonName_f, controller Controller_f)
 {
     isToggle = toggle;
     buttonName = buttonName_f;

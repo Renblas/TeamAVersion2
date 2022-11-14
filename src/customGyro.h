@@ -1,5 +1,5 @@
 // Custom gyro class declaration
-
+/*
 class gyroRotation
 {
 public:
@@ -12,11 +12,13 @@ public:
     void update();
     bool isFinished();
 };
+*/
 
 /*
  * Custom Gyro Class Definitions
  */
 
+/*
 gyroRotation::gyroRotation(float endRotation_f)
 {
     startRotation = GyroA.value(degrees);
@@ -44,3 +46,5 @@ bool gyroRotation::isFinished()
         return false;
     }
 }
+
+*/
