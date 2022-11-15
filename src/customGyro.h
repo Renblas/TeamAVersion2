@@ -1,24 +1,24 @@
 // Custom gyro class declaration
-/*
+
 class gyroRotation
 {
 public:
     float inTurn = false;
-    float startRotation = 0;
-    float endRotation = 0;
+    float startRotation;
+    float endRotation;
     bool finished = false;
 
     gyroRotation(float endRotation_f);
     void update();
     bool isFinished();
 };
-*/
+
 
 /*
  * Custom Gyro Class Definitions
  */
 
-/*
+
 gyroRotation::gyroRotation(float endRotation_f)
 {
     startRotation = GyroA.value(degrees);
@@ -37,7 +37,7 @@ void gyroRotation::update()
 }
 bool gyroRotation::isFinished()
 {
-    if (GyroA.value(degrees) - startRotation >= endRotation)
+    if (GyroB.value(degrees) - startRotation >= endRotation)
     {
         return true;
     }
@@ -47,4 +47,3 @@ bool gyroRotation::isFinished()
     }
 }
 
-*/

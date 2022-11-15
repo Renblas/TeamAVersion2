@@ -15,6 +15,8 @@ public:
 
     std::string buttonName;
 
+    controller Controller_this;
+
     // ----- Functions -----
 
     // constructor
@@ -26,8 +28,7 @@ public:
     // called by above, is master list for determining if button is being pressed
     bool isReleased();
 
-private:
-    controller Controller_this;
+
 };
 
 // Instances of class

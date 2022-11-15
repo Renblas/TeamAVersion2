@@ -93,6 +93,15 @@ public:
 // Constructor definition outside the class
 robot::robot()
 {
+    printScreenAt(1, 1, "Calibrating Gyro...");
+
+    GyroB.startCalibration();
+    while(GyroB.isCalibrating()) {
+        wait(20, msec);
+    }
+
+    printScreenAt(1, 1, "Calibrating Gyro... DONE");
+
 }
 void robot::resetToDefault()
 {

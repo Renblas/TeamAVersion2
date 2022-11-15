@@ -27,7 +27,7 @@ motor endgameMotor = motor(PORT4, ratio6_1, false);
 
 triport ThreeWirePort = vex::triport(vex::PORT22);
 digital_out launcherPneumatics = digital_out(ThreeWirePort.A);
-gyro GyroA = gyro(ThreeWirePort.B);
+gyro GyroB = gyro(ThreeWirePort.B);
 
 /*
  *    ---- END VEXCODE CONFIGURED DEVICES ----
