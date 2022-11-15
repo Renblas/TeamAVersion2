@@ -1,20 +1,18 @@
 # TeamAVersion2
 
-main.cpp is the file with the code, is in /src
+## TODO
 
-----------  REFERENCE  ---------
+Major Stuff
+- autonomous
+    - 2 side
+	- 3 side (DONE needs testing)
+        
+Minor Stuff:
+	- print launcher motor speed to controller screen
+    - draw kewl image to brain screen
+    	- REMEMBER SD CARD!
 
-    TODO:
-        - pnuematics (? maybe fixed)
-        - autonomous
-            - 2 side
-            - 3 side (DONE needs testing)
-        Minor Stuff:
-        - print launcher motor speed to controller screen
-        - switch roller motor to red?
-        - draw kewl image to brain screen
-            - REMEMBER SD CARD!
-            
+### extra small heading
 
     Gear Ratios:
         red, 200 rpm, ratio6_1
