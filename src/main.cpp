@@ -7,11 +7,9 @@
 /*                                                                            */
 /*----------------------------------------------------------------------------*/
 
-#include "vex.h"
-#include <string>
 #include "robot.h"
-#include "buttonEventHandler.h"
 #include "util.h"
+
 
 using namespace vex;
 using std::string;

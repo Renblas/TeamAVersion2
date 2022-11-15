@@ -1,3 +1,5 @@
+#include "robot.h"
+
 // Custom gyro class declaration
 
 class gyroRotation

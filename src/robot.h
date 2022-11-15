@@ -1,7 +1,6 @@
 
-#include "customButton.h"
+#include "buttonEventHandler.h"
 #include "customTimer.h"
-#include "customGyro.h"
 
 
 //  Main Robot Class
@@ -93,14 +92,14 @@ public:
 // Constructor definition outside the class
 robot::robot()
 {
-    printScreenAt(1, 1, "Calibrating Gyro...");
+    printScreenAt("Calibrating Gyro...", 1, 1);
 
     GyroB.startCalibration();
     while(GyroB.isCalibrating()) {
         wait(20, msec);
     }
 
-    printScreenAt(1, 1, "Calibrating Gyro... DONE");
+    printScreenAt("Calibrating Gyro... DONE", 1, 1);
 
 }
 void robot::resetToDefault()
@@ -297,8 +296,8 @@ void robot::updateScreen()
     screenTimer.update();
     if (screenTimer.done())
     {
-        printScreenAt("testing enabled... " + boolToString(enableTesting), 1, 1);
-        printScreenAt("running... " + currentTask, 1, 2);
+        /*printScreenAt("testing enabled... " + boolToString(enableTesting), 1, 1);
+        printScreenAt("running... " + currentTask, 1, 2);*/
 
         Brain.Screen.clearLine(3);
         Brain.Screen.setCursor(3, 1);

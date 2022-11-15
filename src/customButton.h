@@ -15,12 +15,10 @@ public:
 
     std::string buttonName;
 
-    controller Controller_this;
-
     // ----- Functions -----
 
     // constructor
-    customButton(bool toggle, std::string buttonName, controller Controller_f);
+    customButton(bool toggle, std::string buttonName);
     // function called when callback occurs
     void onPressInput();
     // called once per frame, holds logic for if it is realeased
@@ -32,54 +30,53 @@ public:
 };
 
 // Instances of class
-customButton button_l1 = customButton(false, "l1", Controller);
-customButton button_l2 = customButton(true, "l2", Controller);
-customButton button_r1 = customButton(false, "r1", Controller);
-customButton button_r2 = customButton(true, "r2", Controller);
-customButton button_up = customButton(false, "up", Controller);
-customButton button_down = customButton(false, "down", Controller);
-customButton button_left = customButton(false, "left", Controller);
-customButton button_right = customButton(false, "right", Controller);
-customButton button_x = customButton(false, "x", Controller);
-customButton button_b = customButton(false, "b", Controller);
-customButton button_y = customButton(false, "y", Controller);
-customButton button_a = customButton(false, "a", Controller);
+customButton button_l1 = customButton(false, "l1");
+customButton button_l2 = customButton(true, "l2");
+customButton button_r1 = customButton(false, "r1");
+customButton button_r2 = customButton(true, "r2");
+customButton button_up = customButton(false, "up");
+customButton button_down = customButton(false, "down");
+customButton button_left = customButton(false, "left");
+customButton button_right = customButton(false, "right");
+customButton button_x = customButton(false, "x");
+customButton button_b = customButton(false, "b");
+customButton button_y = customButton(false, "y");
+customButton button_a = customButton(false, "a");
 
 /*
  *   Button class definitions
  */
 
-customButton::customButton(bool toggle, string buttonName_f, controller Controller_f)
+customButton::customButton(bool toggle, string buttonName_f)
 {
     isToggle = toggle;
     buttonName = buttonName_f;
-    Controller_this = Controller_f;
 }
 bool customButton::isReleased()
 {
-    if (buttonName == "l1" && !Controller_this.ButtonL1.pressing())
+    if (buttonName == "l1" && !Controller.ButtonL1.pressing())
         return true;
-    else if (buttonName == "l2" && !Controller_this.ButtonL2.pressing())
+    else if (buttonName == "l2" && !Controller.ButtonL2.pressing())
         return true;
-    else if (buttonName == "r1" && !Controller_this.ButtonR1.pressing())
+    else if (buttonName == "r1" && !Controller.ButtonR1.pressing())
         return true;
-    else if (buttonName == "r2" && !Controller_this.ButtonR2.pressing())
+    else if (buttonName == "r2" && !Controller.ButtonR2.pressing())
         return true;
-    else if (buttonName == "up" && !Controller_this.ButtonUp.pressing())
+    else if (buttonName == "up" && !Controller.ButtonUp.pressing())
         return true;
-    else if (buttonName == "down" && !Controller_this.ButtonDown.pressing())
+    else if (buttonName == "down" && !Controller.ButtonDown.pressing())
         return true;
-    else if (buttonName == "left" && !Controller_this.ButtonLeft.pressing())
+    else if (buttonName == "left" && !Controller.ButtonLeft.pressing())
         return true;
-    else if (buttonName == "right" && !Controller_this.ButtonRight.pressing())
+    else if (buttonName == "right" && !Controller.ButtonRight.pressing())
         return true;
-    else if (buttonName == "x" && !Controller_this.ButtonX.pressing())
+    else if (buttonName == "x" && !Controller.ButtonX.pressing())
         return true;
-    else if (buttonName == "y" && !Controller_this.ButtonY.pressing())
+    else if (buttonName == "y" && !Controller.ButtonY.pressing())
         return true;
-    else if (buttonName == "a" && !Controller_this.ButtonA.pressing())
+    else if (buttonName == "a" && !Controller.ButtonA.pressing())
         return true;
-    else if (buttonName == "b" && !Controller_this.ButtonB.pressing())
+    else if (buttonName == "b" && !Controller.ButtonB.pressing())
         return true;
     else
         return false;
