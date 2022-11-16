@@ -256,7 +256,6 @@ void pre_auton(void)
     {
         inCompetition = false;
     }
-    
 }
 
 void autonomous(void)
@@ -525,22 +524,18 @@ void robot::updateEndgameLauncher()
 }
 void robot::auto3Side()
 {
-   
 
     while (true)
     {
         // on frame start, reset inputs
         resetInputs();
 
-       
         if (disksLaunched < 2)
         {
             launcherSpeed = 50;
             enableDiskLauncherMotor = true;
             launchDiskBool = true;
         }
-
-       
 
         // end of frame, apply to motors
         updateMotors();
@@ -769,11 +764,12 @@ void gyroRotation::update()
         {
             Robot.leftDrive = Robot.gyroRotateSpeed;
             Robot.rightDrive = -Robot.gyroRotateSpeed;
-        } else {
+        }
+        else
+        {
             Robot.leftDrive = -Robot.gyroRotateSpeed;
             Robot.rightDrive = Robot.gyroRotateSpeed;
         }
-        
 
         Brain.Screen.clearLine(6);
         Brain.Screen.setCursor(6, 1);
@@ -862,7 +858,8 @@ string boolToString(bool input)
     return a;
 }
 
-float absValue(float input) {
+float absValue(float input)
+{
     if (input < 0)
     {
         input *= -1;
