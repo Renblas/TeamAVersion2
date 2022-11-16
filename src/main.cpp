@@ -31,7 +31,7 @@ motor intakeMotor = motor(PORT10, ratio18_1, false);
 // Roller Motor
 motor rollerMotor = motor(PORT7, ratio6_1, false);
 // Roller Motor
-motor launcherMotor = motor(PORT3, ratio36_1, true);
+motor launcherMotor = motor(PORT3, ratio36_1, false);
 // EndgameMotor
 motor endgameMotor = motor(PORT4, ratio6_1, false);
 
@@ -481,11 +481,11 @@ void robot::updateIntakeMotor()
 {
     if (enableIntakeMotor)
     {
-        intakeMotor.setVelocity(100, percent);
+        intakeMotor.setVelocity(50, percent);
     }
     else if (intakeMotorReverse)
     {
-        intakeMotor.setVelocity(-100, percent);
+        intakeMotor.setVelocity(-50, percent);
     }
     else
     {
