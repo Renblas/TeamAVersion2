@@ -31,13 +31,13 @@ motor intakeMotor = motor(PORT10, ratio18_1, false);
 // Roller Motor
 motor rollerMotor = motor(PORT7, ratio6_1, false);
 // Roller Motor
-motor launcherMotor = motor(PORT3, ratio36_1, false);
+motor launcherMotor = motor(PORT3, ratio36_1, true);
 // EndgameMotor
 motor endgameMotor = motor(PORT4, ratio6_1, false);
 
 triport ThreeWirePort = vex::triport(vex::PORT22);
 digital_out launcherPneumatics = digital_out(ThreeWirePort.A);
-gyro GyroA = gyro(ThreeWirePort.B);
+gyro Gyro = gyro(ThreeWirePort.B);
 
 /*
  *    ---- END VEXCODE CONFIGURED DEVICES ----
@@ -56,17 +56,18 @@ public:
     bool done();
 };
 
-class gyroRotation 
+class gyroRotation
 {
-    public:
-        float inTurn = false;
-        float startRotation = 0;
-        float endRotation = 0;
-        bool finished = false;
+public:
+    float inTurn = false;
+    float startRotation = 0;
+    float endRotation = 0;
+    bool finished = false;
+    bool isLeft;
 
-        gyroRotation(float endRotation_f);
-        void update();
-        bool isFinished();
+    gyroRotation(float endRotation_f, bool dir);
+    void update();
+    bool isFinished();
 };
 
 //  Main Robot Class
@@ -78,7 +79,7 @@ public:
     // Drivetrain
     float leftDrive = 0;
     float rightDrive = 0;
-    float gyroRotateSpeed = 20;
+    float gyroRotateSpeed = 10;
     // bool straightDrive = false;
     //  Roller & Intake
     bool enableRollerMotor = false;
@@ -91,7 +92,7 @@ public:
     bool increaseLauncherSpeed = false;
     bool decreaseLauncherSpeed = false;
     float launcherSpeed_adjustPerSecond = 50;
-    float launcherSpeed_default = 70;
+    float launcherSpeed_default = 100;
     float launcherSpeed = launcherSpeed_default;
     bool enableDiskLauncherMotor = false;
     // fire disk stuff
@@ -149,6 +150,7 @@ public:
     void auto3Side();
     // assume start on 2-side, perpendicular to roller; gets roller and launch 2 disk
     void auto2Side();
+    void autoDebug();
 };
 
 // custom button class
@@ -176,6 +178,7 @@ public:
 
 // declared functions
 string boolToString(bool input);
+float absValue(float input);
 
 /*
  *   Global Variables
@@ -194,8 +197,8 @@ bool enableTesting = false;
 // DO NOT CHANGE!!!!!!!!
 bool inCompetition = true;
 
-// true = 3 sided auton; false = 2 sided auton
-bool auton3Position = false;
+// "3side" = 3 sided auton; "2side" = 2 sided auton; "debug" = debug auton
+string autonFuncToRun = "3side";
 
 string currentTask;
 // Every button has its own object and global function, global function is for callbacks
@@ -237,13 +240,13 @@ void pre_auton(void)
     // set keyboard callbacks
     Controller.ButtonL1.pressed(l1_press);
     Controller.ButtonL2.pressed(l2_press);
-    //Controller.ButtonR1.pressed(r1_press);
+    // Controller.ButtonR1.pressed(r1_press);
     Controller.ButtonR2.pressed(r2_press);
     Controller.ButtonUp.pressed(up_press);
     Controller.ButtonDown.pressed(down_press);
-    //Controller.ButtonLeft.pressed(left_press);
-    //Controller.ButtonRight.pressed(right_press);
-    //Controller.ButtonX.pressed(x_press);
+    // Controller.ButtonLeft.pressed(left_press);
+    // Controller.ButtonRight.pressed(right_press);
+    // Controller.ButtonX.pressed(x_press);
     Controller.ButtonB.pressed(b_press);
     Controller.ButtonY.pressed(y_press);
     Controller.ButtonA.pressed(a_press);
@@ -253,20 +256,31 @@ void pre_auton(void)
     {
         inCompetition = false;
     }
+    
 }
 
 void autonomous(void)
 {
-    if (auton3Position)
+    Gyro.startCalibration();
+    while (Gyro.isCalibrating())
+    {
+        wait(20, msec);
+    }
+
+    if (autonFuncToRun == "3side")
     {
         currentTask = "AUTONOMOUS_3_SIDE";
-        //Robot.updateScreen();
+        // Robot.updateScreen();
         Robot.auto3Side();
     }
-    else
+    else if (autonFuncToRun == "2side")
     {
         currentTask = "AUTONOMOUS_2_SIDE";
         Robot.auto2Side();
+    }
+    else if (autonFuncToRun == "debug")
+    {
+        Robot.autoDebug();
     }
 }
 
@@ -357,9 +371,9 @@ void robot::getUserInput()
     // Arrow Button Input
     enableRollerMotor = button_a.pressed;
     rollerMotorReverse = button_b.pressed;
-    //increaseLauncherSpeed = button_left.pressed;
-    //decreaseLauncherSpeed = button_right.pressed;
-    // Back Button Input
+    // increaseLauncherSpeed = button_left.pressed;
+    // decreaseLauncherSpeed = button_right.pressed;
+    //  Back Button Input
     enableIntakeMotor = button_l2.pressed;
     intakeMotorReverse = button_l1.pressed;
     enableDiskLauncherMotor = button_r2.pressed;
@@ -386,9 +400,9 @@ void robot::getUserInput()
     button_r2.checkRelease();
     button_up.checkRelease();
     button_down.checkRelease();
-    //button_left.checkRelease();
-    //button_right.checkRelease();
-    //button_x.checkRelease();
+    // button_left.checkRelease();
+    // button_right.checkRelease();
+    // button_x.checkRelease();
     button_y.checkRelease();
     button_a.checkRelease();
     button_b.checkRelease();
@@ -481,11 +495,11 @@ void robot::updateIntakeMotor()
 {
     if (enableIntakeMotor)
     {
-        intakeMotor.setVelocity(50, percent);
+        intakeMotor.setVelocity(75, percent);
     }
     else if (intakeMotorReverse)
     {
-        intakeMotor.setVelocity(-50, percent);
+        intakeMotor.setVelocity(-75, percent);
     }
     else
     {
@@ -511,52 +525,22 @@ void robot::updateEndgameLauncher()
 }
 void robot::auto3Side()
 {
-    bool spunRoller = false;
-
-    customTimer driveToRoller_Timer = customTimer(0.5);
-    customTimer spinRoller_Timer = customTimer(5); // Theoretical time to spin roller; see README 0.48
-    customTimer driveAtEnd_Timer = customTimer(0.5);
+   
 
     while (true)
     {
         // on frame start, reset inputs
         resetInputs();
 
-        // first task: fire two disks
-        /*if (disksLaunched < 2)
+       
+        if (disksLaunched < 2)
         {
-            launcherSpeed = 100;
+            launcherSpeed = 50;
             enableDiskLauncherMotor = true;
             launchDiskBool = true;
-            if (disksLaunched >= 1)
-            {
-                enableIntakeMotor = true;
-            }
-        }*/
-
-        // second task:
-        /*else*/ if (!spunRoller && !diskTimer.done())
-        {
-            if (!driveToRoller_Timer.done())
-            {
-                leftDrive = 20;
-                rightDrive = 20;
-                driveToRoller_Timer.update();
-            }
-            else if (!spinRoller_Timer.done())
-            {
-                enableRollerMotor = true;
-                rollerMotorVelocity = 100;
-                spinRoller_Timer.update();
-                if (spinRoller_Timer.done()) spunRoller = true;
-            }
-            else if (!driveAtEnd_Timer.done())
-            {
-                leftDrive = -10;
-                rightDrive = -10;
-                driveAtEnd_Timer.update();
-            }
         }
+
+       
 
         // end of frame, apply to motors
         updateMotors();
@@ -579,7 +563,7 @@ void robot::auto2Side()
     while (true)
     {
         resetInputs();
-        
+
         if (!spunRoller)
         {
             if (!driveToTurn_Timer.done())
@@ -608,8 +592,7 @@ void robot::auto2Side()
                 enableRollerMotor = true;
                 testTimer.update();
             }
-            
-            
+
             /*else if (!spinRoller_Timer.done())
             {
                 enableRollerMotor = true;
@@ -631,7 +614,21 @@ void robot::auto2Side()
 
         wait(20, msec);
     }
-    
+}
+void robot::autoDebug()
+{
+
+    gyroRotation turn90 = gyroRotation(90, false);
+
+    while (true)
+    {
+        resetInputs();
+
+        turn90.update();
+
+        Robot.updateMotors();
+        wait(20, msec);
+    }
 }
 void robot::updateScreen()
 {
@@ -640,7 +637,7 @@ void robot::updateScreen()
     {
         printScreenAt("testing enabled... " + boolToString(enableTesting), 1, 1);
         printScreenAt("running... " + currentTask, 1, 2);
-        
+
         Brain.Screen.clearLine(3);
         Brain.Screen.setCursor(3, 1);
         Brain.Screen.print(diskTimer.time);
@@ -757,23 +754,43 @@ void customButton::onPressInput()
 
 // gyroRotation class definitions
 
-
-gyroRotation::gyroRotation(float endRotation_f) {
-    startRotation = GyroA.value(degrees);
+gyroRotation::gyroRotation(float endRotation_f, bool dir)
+{
     endRotation = endRotation_f;
+    isLeft = dir;
 }
-void gyroRotation::update() {
-    if(!isFinished()) {
-        Robot.leftDrive = Robot.gyroRotateSpeed;
-        Robot.rightDrive = -Robot.gyroRotateSpeed;
-    } else {
+void gyroRotation::update()
+{
+    float curRotation = Gyro.rotation(degrees);
 
+    if (!isFinished())
+    {
+        if (endRotation - curRotation <= absValue(360 - endRotation) - curRotation)
+        {
+            Robot.leftDrive = Robot.gyroRotateSpeed;
+            Robot.rightDrive = -Robot.gyroRotateSpeed;
+        } else {
+            Robot.leftDrive = -Robot.gyroRotateSpeed;
+            Robot.rightDrive = Robot.gyroRotateSpeed;
+        }
+        
+
+        Brain.Screen.clearLine(6);
+        Brain.Screen.setCursor(6, 1);
+        Brain.Screen.print(Gyro.rotation(degrees));
+    }
+    else
+    {
     }
 }
-bool gyroRotation::isFinished() {
-    if(GyroA.value(degrees) - startRotation >= endRotation) {
+bool gyroRotation::isFinished()
+{
+    if (Gyro.rotation(degrees) >= (endRotation - 4) && Gyro.rotation(degrees) <= (endRotation + 4))
+    {
         return true;
-    } else {
+    }
+    else
+    {
         return false;
     }
 }
@@ -845,4 +862,11 @@ string boolToString(bool input)
     return a;
 }
 
+float absValue(float input) {
+    if (input < 0)
+    {
+        input *= -1;
+    }
+    return input;
+}
 // hi
