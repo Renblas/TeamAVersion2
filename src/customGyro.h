@@ -23,7 +23,7 @@ public:
 
 gyroRotation::gyroRotation(float endRotation_f)
 {
-    startRotation = GyroA.value(degrees);
+    startRotation = GyroB.value(degrees);
     endRotation = endRotation_f;
 }
 void gyroRotation::update()

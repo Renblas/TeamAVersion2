@@ -1,5 +1,7 @@
 #include "vex.h"
 
+using namespace vex;
+
 /*
  *    ---- START VEXCODE CONFIGURED DEVICES ----
  */
@@ -21,13 +23,13 @@ motor intakeMotor = motor(PORT10, ratio18_1, false);
 // Roller Motor
 motor rollerMotor = motor(PORT7, ratio6_1, false);
 // Roller Motor
-motor launcherMotor = motor(PORT3, ratio36_1, true);
+motor launcherMotor = motor(PORT3, ratio36_1, false);
 // EndgameMotor
 motor endgameMotor = motor(PORT4, ratio6_1, false);
 
-triport ThreeWirePort = vex::triport(vex::PORT22);
-digital_out launcherPneumatics = digital_out(ThreeWirePort.A);
-gyro GyroB = gyro(ThreeWirePort.B);
+//triport ThreeWirePort = vex::triport(vex::PORT22);
+//digital_out launcherPneumatics = digital_out(ThreeWirePort.A);
+//gyro GyroB = gyro(ThreeWirePort.A);
 
 /*
  *    ---- END VEXCODE CONFIGURED DEVICES ----

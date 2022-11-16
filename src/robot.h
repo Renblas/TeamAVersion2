@@ -94,10 +94,10 @@ robot::robot()
 {
     printScreenAt("Calibrating Gyro...", 1, 1);
 
-    GyroB.startCalibration();
+    /*GyroB.startCalibration();
     while(GyroB.isCalibrating()) {
         wait(20, msec);
-    }
+    }*/
 
     printScreenAt("Calibrating Gyro... DONE", 1, 1);
 
@@ -131,7 +131,7 @@ void robot::updateMotors()
     updateIntakeMotor();
     updateRollerMotor();
     updateLauncherMotor();
-    firingProtocol();
+    //firingProtocol();
     updateEndgameLauncher();
 }
 void robot::getUserInput()
