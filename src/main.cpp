@@ -27,7 +27,7 @@ motor_group leftMotorGroup = motor_group(frontLeftMotor, backLeftMotor);
 motor_group rightMotorGroup = motor_group(frontRightMotor, backRightMotor);
 
 // Intake Motor
-motor intakeMotor = motor(PORT10, ratio18_1, false);
+motor intakeMotor = motor(PORT10, ratio6_1, false);
 // Roller Motor
 motor rollerMotor = motor(PORT7, ratio6_1, false);
 // Roller Motor
@@ -524,13 +524,48 @@ void robot::updateEndgameLauncher()
 }
 void robot::auto3Side()
 {
+    customTimer driveToRoller_Timer = customTimer(1);
+    customTimer spinRoller_Timer = customTimer(0.5);
+    customTimer driveFromRoller_Timer = customTimer(0.75);
+
+    gyroRotation turnToLowGoal = gyroRotation(270, false);
+    bool turnComplete = false;
 
     while (true)
     {
         // on frame start, reset inputs
         resetInputs();
 
-        if (disksLaunched < 2)
+        if (!driveToRoller_Timer.done())
+        {
+            leftDrive = 15;
+            rightDrive = 15;
+
+            driveToRoller_Timer.update();
+        }
+        else if (!spinRoller_Timer.done())
+        {
+            enableRollerMotor = true;
+            rollerMotorVelocity = 50;
+
+            spinRoller_Timer.update();
+        }
+        else if (!driveFromRoller_Timer.done())
+        {
+            leftDrive = -10;
+            rightDrive = -10;
+
+            driveFromRoller_Timer.update();
+        }
+        else if (!turnComplete)
+        {
+            turnToLowGoal.update();
+            if (turnToLowGoal.isFinished())
+            {
+                turnComplete = true;
+            }
+        }
+        else if (disksLaunched < 2)
         {
             launcherSpeed = 50;
             enableDiskLauncherMotor = true;
@@ -546,63 +581,22 @@ void robot::auto3Side()
 }
 void robot::auto2Side()
 {
-    bool spunRoller = false;
 
-    customTimer driveToTurn_Timer = customTimer(1.75);
-    customTimer turn90_Timer = customTimer(1.15); // time to turn 90 degrees, based off of 5.2 sec full rotation
-    customTimer driveToRoller_Timer = customTimer(1);
-    customTimer spinRoller_Timer = customTimer(0.5); // Theoretical time to spin roller; see README 0.48
-    customTimer driveAtEnd_Timer = customTimer(0.5);
-    customTimer testTimer = customTimer(1);
+    customTimer driveBack_Timer = customTimer(0.5);
 
     while (true)
     {
         resetInputs();
 
-        if (!spunRoller)
+        if (disksLaunched < 2)
         {
-            if (!driveToTurn_Timer.done())
-            {
-                leftDrive = 20;
-                rightDrive = 20;
-                driveToTurn_Timer.update();
-            }
-            else if (!turn90_Timer.done())
-            {
-                leftDrive = 20;
-                rightDrive = -10;
-                turn90_Timer.update();
-            }
-            else if (!driveToRoller_Timer.done())
-            {
-                leftDrive = 20;
-                rightDrive = 20;
-                driveToRoller_Timer.update();
-            }
-            else if (!testTimer.done())
-            {
-                leftDrive = -10;
-                rightDrive = -10;
-                rollerMotorVelocity = 50;
-                enableRollerMotor = true;
-                testTimer.update();
-            }
-
-            /*else if (!spinRoller_Timer.done())
-            {
-                enableRollerMotor = true;
-                rollerMotorVelocity = 50;
-                leftDrive = 7.5;
-                rightDrive = 7.5;
-                spinRoller_Timer.update();
-                if (spinRoller_Timer.done()) spunRoller = true;
-            }
-            else if (!driveAtEnd_Timer.done())
-            {
-                leftDrive = -10;
-                rightDrive = -10;
-                driveAtEnd_Timer.update();
-            }*/
+            launcherSpeed = 50;
+            enableDiskLauncherMotor = true;
+            launchDiskBool = true;
+        }
+        else if (driveBack_Timer.done())
+        {
+            /* code */
         }
 
         updateMotors();
