@@ -531,9 +531,6 @@ void robot::auto3Side()
     gyroRotation turnToLowGoal = gyroRotation(270, false);
     bool turnComplete = false;
 
-    customTimer driveAtEnd_Timer = customTimer(2);
-    bool endDriveEnabled = true;
-
     while (true)
     {
         // on frame start, reset inputs
@@ -573,14 +570,7 @@ void robot::auto3Side()
             launcherSpeed = 50;
             enableDiskLauncherMotor = true;
             launchDiskBool = true;
-        } else if (!driveAtEnd_Timer.done() && endDriveEnabled)
-        {
-            leftDrive = 100;
-            rightDrive = 100;
-
-            driveAtEnd_Timer.update();
         }
-        
 
         // end of frame, apply to motors
         updateMotors();
@@ -594,6 +584,13 @@ void robot::auto2Side()
 
     customTimer driveBack_Timer = customTimer(0.5);
 
+    gyroRotation turnToRoller = gyroRotation(90, true);
+    bool turnToRoller_done = false;
+
+    customTimer moveToRoller = customTimer(1);
+    customTimer spinRoller_Timer = customTimer(1);
+    customTimer leaveRoller_Timer = customTimer(1);
+
     while (true)
     {
         resetInputs();
@@ -606,7 +603,40 @@ void robot::auto2Side()
         }
         else if (driveBack_Timer.done())
         {
-            /* code */
+            leftDrive = 10;
+            rightDrive = 10;
+
+            driveBack_Timer.update();
+        }
+        else if (!turnToRoller_done)
+        {
+            turnToRoller.update();
+
+            if (turnToRoller.isFinished())
+            {
+                turnToRoller_done = true;
+            }
+        }
+        else if (!moveToRoller.done())
+        {
+            leftDrive = 10;
+            rightDrive = 10;
+
+            moveToRoller.update();
+        }
+        else if (!spinRoller_Timer.done())
+        {
+            enableRollerMotor = true;
+            rollerMotorVelocity = 50;
+
+            spinRoller_Timer.update();
+        }
+        else if (!leaveRoller_Timer.done())
+        {
+            leftDrive = -10;
+            rightDrive = -10;
+
+            leaveRoller_Timer.done();
         }
 
         updateMotors();
