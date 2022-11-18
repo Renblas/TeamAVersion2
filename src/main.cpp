@@ -582,14 +582,14 @@ void robot::auto3Side()
 void robot::auto2Side()
 {
 
-    customTimer driveBack_Timer = customTimer(2.5);
+    customTimer driveBack_Timer = customTimer(1);
 
     gyroRotation turnToRoller = gyroRotation(90, true);
     bool turnToRoller_done = false;
 
     customTimer moveToRoller = customTimer(1.5);
-    customTimer spinRoller_Timer = customTimer(1);
-    customTimer leaveRoller_Timer = customTimer(0.5);
+    customTimer spinRoller_Timer = customTimer(0.5);
+    customTimer leaveRoller_Timer = customTimer(0);
 
     while (true)
     {
@@ -597,7 +597,7 @@ void robot::auto2Side()
 
         if (disksLaunched < 2 || !diskTimer.done())
         {
-            launcherSpeed = 60;
+            launcherSpeed = 50;
             enableDiskLauncherMotor = true;
             launchDiskBool = true;
         }
@@ -633,8 +633,8 @@ void robot::auto2Side()
         }
         else if (!leaveRoller_Timer.done())
         {
-            leftDrive = -10;
-            rightDrive = -10;
+            leftDrive = -5;
+            rightDrive = -5;
 
             leaveRoller_Timer.done();
         }

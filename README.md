@@ -44,8 +44,8 @@ Minor Stuff:
         ---- Buttons on Back ----
         L1 - emergency untoggles intake and while held reverses intake, aka emergency clear
         L2 - Toggle, turns on intake and sucks disks (pun intended)
-        R1 - Toggle, turns on disk launcher at current speed (default 85%)
-        R2 - Roller Motor Clockwise
+        R1 -  
+        R2 - disk launcher motor, toggle
 
         ---- Arrow Pad ----
         Up - Endgame string thing clockwise, launch
@@ -54,10 +54,10 @@ Minor Stuff:
         Right - 
 
         ---- Letter Pad ----
-        X (top) - Launch disk if criteria are met
-        B (bottom) -
-        Y (left) -
-        A (right) - 
+        X (top) - 
+        B (bottom) - roller back
+        Y (left) - launch disk
+        A (right) - roller fwd
 
         ---- Axis ----
         Axis 4 (Left Knob X-Direction) -
