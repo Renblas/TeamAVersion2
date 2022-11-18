@@ -4,36 +4,36 @@
 
 Major Stuff
 - autonomous
-    - 2 side
+	- 2 side
 	- 3 side (DONE needs testing)
         
 Minor Stuff:
-	- print launcher motor speed to controller screen
-    - draw kewl image to brain screen
-    	- REMEMBER SD CARD!
+- print launcher motor speed to controller screen
+- draw kewl image to brain screen
+- REMEMBER SD CARD!
 
-### extra small heading
+## Reference
 
-    Gear Ratios:
-        red, 200 rpm, ratio6_1
-        green, 400 rpm, ratio18_1
-        blue, 600 rpm, ratio36_1
-        special black, max 3600 rpm, just set as blue but when need rpm multiply by 6
+### Gear Ratios:
+- red, 200 rpm, ratio6_1
+- green, 400 rpm, ratio18_1
+- blue, 600 rpm, ratio36_1
+- special black, max 3600 rpm, just set as blue but when need rpm multiply by 6
 
-    Roller Specs:
-        Flex Wheel
-            - 3 inch diameter
-            - 9.42477 circumference
+### Roller Specs:
+	- Flex Wheel  
+		- 3 inch diameter  
+		- 9.42477 circumference  
 
-        Roller
-            - 2.4 inch diameter
-            - 7.53982 circumference
+### Roller  
+	- 2.4 inch diameter  
+	- 7.53982 circumference  
 
-        Ratio 
-            9.42477 / 7.53982 = 1.24999 roller rotations per 1 flex rotations
-            need to move roller 1/4 rotations so...
-            1.24999^-1 = 0.800
-            0.800 * 1/4 = 0.20
+### Ratio 
+	9.42477 / 7.53982 = 1.24999 roller rotations per 1 flex rotations  
+	need to move roller 1/4 rotations so...  
+    1.24999^-1 = 0.800  
+    0.800 * 1/4 = 0.20  
 
             aka to move roller precisely 1/4 turn, move motor by 0.2 rotations
                 
