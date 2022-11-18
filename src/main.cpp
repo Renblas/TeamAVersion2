@@ -531,6 +531,9 @@ void robot::auto3Side()
     gyroRotation turnToLowGoal = gyroRotation(270, false);
     bool turnComplete = false;
 
+    customTimer driveAtEnd_Timer = customTimer(2);
+    bool endDriveEnabled = true;
+
     while (true)
     {
         // on frame start, reset inputs
@@ -570,7 +573,14 @@ void robot::auto3Side()
             launcherSpeed = 50;
             enableDiskLauncherMotor = true;
             launchDiskBool = true;
+        } else if (!driveAtEnd_Timer.done() && endDriveEnabled)
+        {
+            leftDrive = 100;
+            rightDrive = 100;
+
+            driveAtEnd_Timer.update();
         }
+        
 
         // end of frame, apply to motors
         updateMotors();
