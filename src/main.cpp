@@ -198,7 +198,7 @@ bool enableTesting = false;
 bool inCompetition = true;
 
 // "3side" = 3 sided auton; "2side" = 2 sided auton; "debug" = debug auton
-string autonFuncToRun = "3side";
+string autonFuncToRun = "2side";
 
 string currentTask;
 // Every button has its own object and global function, global function is for callbacks
@@ -526,9 +526,9 @@ void robot::auto3Side()
 {
     customTimer driveToRoller_Timer = customTimer(1);
     customTimer spinRoller_Timer = customTimer(0.5);
-    customTimer driveFromRoller_Timer = customTimer(0.75);
+    customTimer driveFromRoller_Timer = customTimer(1);
 
-    gyroRotation turnToLowGoal = gyroRotation(270, false);
+    gyroRotation turnToLowGoal = gyroRotation(90, false);
     bool turnComplete = false;
 
     while (true)
@@ -538,15 +538,15 @@ void robot::auto3Side()
 
         if (!driveToRoller_Timer.done())
         {
-            leftDrive = 15;
-            rightDrive = 15;
+            leftDrive = 12;
+            rightDrive = 12;
 
             driveToRoller_Timer.update();
         }
         else if (!spinRoller_Timer.done())
         {
             enableRollerMotor = true;
-            rollerMotorVelocity = 50;
+            rollerMotorVelocity = 25;
 
             spinRoller_Timer.update();
         }
@@ -565,9 +565,9 @@ void robot::auto3Side()
                 turnComplete = true;
             }
         }
-        else if (disksLaunched < 2)
+        else if (disksLaunched < 2 || !diskTimer.done())
         {
-            launcherSpeed = 50;
+            launcherSpeed = 60;
             enableDiskLauncherMotor = true;
             launchDiskBool = true;
         }
@@ -582,29 +582,29 @@ void robot::auto3Side()
 void robot::auto2Side()
 {
 
-    customTimer driveBack_Timer = customTimer(0.5);
+    customTimer driveBack_Timer = customTimer(2.5);
 
     gyroRotation turnToRoller = gyroRotation(90, true);
     bool turnToRoller_done = false;
 
-    customTimer moveToRoller = customTimer(1);
+    customTimer moveToRoller = customTimer(1.5);
     customTimer spinRoller_Timer = customTimer(1);
-    customTimer leaveRoller_Timer = customTimer(1);
+    customTimer leaveRoller_Timer = customTimer(0.5);
 
     while (true)
     {
         resetInputs();
 
-        if (disksLaunched < 2)
+        if (disksLaunched < 2 || !diskTimer.done())
         {
-            launcherSpeed = 50;
+            launcherSpeed = 60;
             enableDiskLauncherMotor = true;
             launchDiskBool = true;
         }
-        else if (driveBack_Timer.done())
+        else if (!driveBack_Timer.done())
         {
-            leftDrive = 10;
-            rightDrive = 10;
+            leftDrive = 20;
+            rightDrive = 20;
 
             driveBack_Timer.update();
         }
