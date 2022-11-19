@@ -37,6 +37,7 @@ motor endgameMotor = motor(PORT4, ratio6_1, false);
 
 triport ThreeWirePort = vex::triport(vex::PORT22);
 digital_out launcherPneumatics = digital_out(ThreeWirePort.A);
+//digital_out endGamePneumatics = digital_out(ThreeWirePort.C);
 gyro Gyro = gyro(ThreeWirePort.B);
 
 /*
@@ -84,7 +85,7 @@ public:
     //  Roller & Intake
     bool enableRollerMotor = false;
     bool rollerMotorReverse = false;
-    float defaultRollerMotorVelocity = 50;
+    float defaultRollerMotorVelocity = 90;
     float rollerMotorVelocity = defaultRollerMotorVelocity;
     bool enableIntakeMotor = false;
     bool intakeMotorReverse = false;
@@ -92,7 +93,7 @@ public:
     bool increaseLauncherSpeed = false;
     bool decreaseLauncherSpeed = false;
     float launcherSpeed_adjustPerSecond = 50;
-    float launcherSpeed_default = 100;
+    float launcherSpeed_default = 90;
     float launcherSpeed = launcherSpeed_default;
     bool enableDiskLauncherMotor = false;
     // fire disk stuff
@@ -105,6 +106,10 @@ public:
     // Endgame
     bool enableEndgame = false;
     bool enableEndgameReverse = false;
+    // beta 3 shooter engame
+    bool endGameTriggered = false;
+    customTimer endGamePiston_Timer = customTimer(1);
+
     // Screen
     bool enableImage = false;
     float screenRefreshRate = 1 / 30;
@@ -275,6 +280,7 @@ void autonomous(void)
     else if (autonFuncToRun == "2side")
     {
         currentTask = "AUTONOMOUS_2_SIDE";
+        Brain.Screen.print("hi");
         Robot.auto2Side();
     }
     else if (autonFuncToRun == "debug")
@@ -522,6 +528,26 @@ void robot::updateEndgameLauncher()
     }
     endgameMotor.spin(fwd);
 }
+/*void robot::updateEndgameLauncher()
+{
+    if (enableEndgame)
+    {
+        if (!endGameTriggered)
+        {
+            endGamePneumatics.set(true);
+            endGameTriggered = true;
+        }
+    }
+
+    if (endGameTriggered && !endGamePiston_Timer.done())
+    {
+        endGamePiston_Timer.update();
+    }
+    else if (endGamePiston_Timer.done())
+    {
+        endGamePneumatics.set(false);
+    }
+}*/
 void robot::auto3Side()
 {
     customTimer driveToRoller_Timer = customTimer(1);
@@ -547,6 +573,9 @@ void robot::auto3Side()
         {
             enableRollerMotor = true;
             rollerMotorVelocity = 25;
+
+            leftDrive = 5;
+            rightDrive = 5;
 
             spinRoller_Timer.update();
         }
@@ -589,7 +618,7 @@ void robot::auto2Side()
 
     customTimer moveToRoller = customTimer(1.5);
     customTimer spinRoller_Timer = customTimer(0.5);
-    customTimer leaveRoller_Timer = customTimer(0);
+    customTimer leaveRoller_Timer = customTimer(0.25);
 
     while (true)
     {
@@ -603,8 +632,8 @@ void robot::auto2Side()
         }
         else if (!driveBack_Timer.done())
         {
-            leftDrive = 20;
-            rightDrive = 20;
+            leftDrive = 30;
+            rightDrive = 30;
 
             driveBack_Timer.update();
         }
@@ -628,6 +657,9 @@ void robot::auto2Side()
         {
             enableRollerMotor = true;
             rollerMotorVelocity = 50;
+
+            leftDrive = 5;
+            rightDrive = 5;
 
             spinRoller_Timer.update();
         }
